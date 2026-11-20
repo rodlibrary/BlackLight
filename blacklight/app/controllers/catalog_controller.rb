@@ -55,6 +55,7 @@ class CatalogController < ApplicationController
     config.add_show_field 'language_ssim', label: 'Language', link_to_facet: true
     config.add_show_field 'extent_ssm', label: 'Extent of original'
     config.add_show_field 'collection_ssim', label: 'Collection', link_to_facet: true
+    config.add_show_field 'department_ssim', label: 'Department', link_to_facet: true
     config.add_show_field 'relation_ssm', label: 'Related'
     config.add_show_field 'physical_location_ssm', label: 'Original held at'
     config.add_show_field 'shelf_locator_ssm', label: 'Location of original'
@@ -67,6 +68,8 @@ class CatalogController < ApplicationController
 
     # --- Facets ---------------------------------------------------------------
     config.add_facet_field 'entity_type_ssim', label: 'Show', limit: 5
+    # From the DCDS_local metadata fragment (local_metadata in config.yaml); only some items have it.
+    config.add_facet_field 'department_ssim', label: 'Department', limit: 10
     config.add_facet_field 'collection_ssim', label: 'Collection', limit: 10
     config.add_facet_field 'resource_type_ssim', label: 'Type', limit: 10
     config.add_facet_field 'creator_ssim', label: 'Creator', limit: 10

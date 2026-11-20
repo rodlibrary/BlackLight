@@ -33,10 +33,12 @@ class EntityInfo:
     description: str | None
     security_tag: str | None
     parent: str | None
+    # (schema namespace, URL) for each metadata fragment, from AdditionalInformation/Metadata
+    fragments: tuple[tuple[str, str], ...] = ()
 
 
 def parse_entity(root: ET.Element, kind: str, ref: str) -> EntityInfo:
-    """Read Ref, Title, Description, SecurityTag and Parent from an EntityResponse, whatever its XIP version."""
+    """Read Ref, Title, Description, SecurityTag, Parent and metadata fragment links, whatever the XIP version."""
     wanted = "InformationObject" if kind == "io" else "StructuralObject"
     obj = next((e for e in root.iter() if _local(e.tag) == wanted), None)
     if obj is None:
@@ -47,9 +49,11 @@ def parse_entity(root: ET.Element, kind: str, ref: str) -> EntityInfo:
         text = "".join(child.itertext()).strip()
         if text and name not in values:
             values[name] = text
+    fragments = tuple((e.get("schema", "").strip(), (e.text or "").strip())
+                      for e in root.iter() if _local(e.tag) == "Fragment" and (e.text or "").strip())
     return EntityInfo(kind=kind, ref=values.get("Ref", ref), title=values.get("Title"),
                       description=values.get("Description"), security_tag=values.get("SecurityTag"),
-                      parent=values.get("Parent"))
+                      parent=values.get("Parent"), fragments=fragments)
 
 
 class Hierarchy:

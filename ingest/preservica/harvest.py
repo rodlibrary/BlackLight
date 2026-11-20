@@ -18,6 +18,7 @@ from typing import Iterator
 from ..core import Deletion, Record, record_id
 from .client import PreservicaClient
 from .hierarchy import EntityInfo, Hierarchy
+from .local_metadata import local_fields, validate as validate_local
 from .metadata import from_oai_record, media_type_for
 from .oai import NS, OAI_ID, list_records
 from .thumbnails import ThumbnailCache
@@ -71,6 +72,10 @@ class Harvester:
         self.handled: set[str] = set()          # record ids decided in this run (indexed or removed)
         self.chain_folders: dict[str, EntityInfo] = {}   # public folders that appear in breadcrumbs
         self.split_on = settings.get("dc_split", ";") or None
+        self.local = validate_local(settings.get("local_metadata") or [])
+        if self.local and not self.hierarchy:
+            log.warning("local_metadata needs resolve_hierarchy: true (it reads the Entity API); ignored")
+            self.local = []
 
     # ------------------------------------------------------------------ driver
 
@@ -150,8 +155,9 @@ class Harvester:
         if not title:
             log.warning("%s has no title; skipped", oai_id)
             return None
+        local = local_fields(self.client, info, self.local) if self.local and info else {}
         self.handled.add(rid)
-        return self.build(kind, ref, title, f, chain)
+        return self.build(kind, ref, title, f, chain, local=local)
 
     # ------------------------------------------------------------------ building records
 
@@ -169,7 +175,7 @@ class Harvester:
         return self.thumbs.get(kind, ref, changed=changed)
 
     def build(self, kind: str, ref: str, title: str, f: dict, chain: list[EntityInfo], *,
-              changed: bool | None = None) -> Record:
+              changed: bool | None = None, local: dict | None = None) -> Record:
         # Records an incremental harvest returns have changed, so their thumbnails are fetched again.
         changed = self.since is not None if changed is None else changed
         is_folder = kind == "so"
@@ -238,6 +244,7 @@ class Harvester:
                 "extent_ssm": f["extent"],
                 "digital_origin_ssi": f["digital_origin"],
                 "relation_ssm": f["relations"],
+                **(local or {}),
             }.items() if v},
         )
 

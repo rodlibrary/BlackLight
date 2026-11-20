@@ -83,7 +83,7 @@ def oai_error(code):
     return ET.fromstring(f'{OAI_HEAD}<error code="{code}">message</error>{OAI_TAIL}')
 
 
-def entity_xml(kind, ref, title, tag="open", parent=None, description=None, version="7.0"):
+def entity_xml(kind, ref, title, tag="open", parent=None, description=None, version="7.0", fragments=()):
     el = "InformationObject" if kind == "io" else "StructuralObject"
     parts = [f"<xip:Ref>{ref}</xip:Ref>", f"<xip:Title>{title}</xip:Title>"]
     if description:
@@ -91,20 +91,22 @@ def entity_xml(kind, ref, title, tag="open", parent=None, description=None, vers
     parts.append(f"<xip:SecurityTag>{tag}</xip:SecurityTag>")
     if parent:
         parts.append(f"<xip:Parent>{parent}</xip:Parent>")
+    frags = "".join(f'<Fragment schema="{schema}">{url}</Fragment>' for schema, url in fragments)
     return ET.fromstring(
         f'<EntityResponse xmlns="http://preservica.com/EntityAPI/v{version}" '
         f'xmlns:xip="http://preservica.com/XIP/v{version}"><xip:{el}>{"".join(parts)}</xip:{el}>'
-        f'<AdditionalInformation/></EntityResponse>')
+        f'<AdditionalInformation><Metadata>{frags}</Metadata></AdditionalInformation></EntityResponse>')
 
 
 class FakePreservica:
     """Stands in for PreservicaClient. pages: {prefix: [page, ...]}; entities: {(kind, ref): Element}."""
 
-    def __init__(self, pages=None, entities=None, thumbnails=None):
+    def __init__(self, pages=None, entities=None, thumbnails=None, fragments=None):
         self.pages = {k: list(v) for k, v in (pages or {}).items()}
         self.entities = entities or {}
         self.thumbnails = thumbnails or {}
-        self.oai_calls, self.entity_calls, self.thumbnail_calls = [], [], []
+        self.fragments = fragments or {}
+        self.oai_calls, self.entity_calls, self.thumbnail_calls, self.fragment_calls = [], [], [], []
 
     def oai(self, params):
         self.oai_calls.append(dict(params))
@@ -120,6 +122,12 @@ class FakePreservica:
         if (kind, ref) not in self.entities:
             raise NotVisible(f"{kind}:{ref}")
         return self.entities[(kind, ref)]
+
+    def fragment(self, url):
+        self.fragment_calls.append(url)
+        if url not in self.fragments:
+            raise NotVisible(url)
+        return self.fragments[url]
 
     def thumbnail(self, kind, ref, size="medium"):
         self.thumbnail_calls.append((kind, ref, size))
