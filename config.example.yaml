@@ -1,0 +1,67 @@
+# Copy to config.yaml and adjust. Secrets are never stored here: use environment
+# variables, written as ${NAME} or ${NAME:-default}.
+
+solr_url: "${SOLR_URL:-http://127.0.0.1:8983/solr/preservica}"
+
+# Machine name stamped on every record and used in ids (preservica-<uuid>).
+# Changing it later means re-indexing from scratch.
+source: preservica
+
+# Incremental-harvest checkpoint, relative to this file.
+state_dir: ".ingest-state"
+
+preservica:
+  # Display name for the Source facet and record pages.
+  label: "Digital Archive"
+
+  # --- Connection -----------------------------------------------------------
+  # Use a read-only service account whose role sees only the security tags you publish.
+  base_url: "${PRESERVICA_BASE_URL}"          # e.g. https://<server>.preservica.com
+  oai_url: "${PRESERVICA_OAI_URL}"            # OAI-PMH endpoint; confirm the path for your tenant
+  username: "${PRESERVICA_USERNAME}"
+  password: "${PRESERVICA_PASSWORD}"
+  tenant: "${PRESERVICA_TENANT:-}"
+  auth: token                                 # token (preferred) or basic
+  request_delay: 0                            # seconds between requests, if your tenant rate-limits
+
+  # --- Metadata ------------------------------------------------------------
+  # OAI-PMH prefixes to harvest, in order of preference. Preservica returns a
+  # schema only for records that have it embedded, so listing MODS then oai_dc
+  # indexes MODS where it exists and Dublin Core for everything else.
+  # `python -m ingest check` shows which prefixes a sample asset carries.
+  metadata_prefix: [MODS, oai_dc]
+  oai_set: ""                                 # optional OAI set to limit the harvest
+  dc_split: ";"                               # split Dublin Core subjects/languages/coverage on this
+
+  # --- What is public -------------------------------------------------------
+  # Records whose security tag isn't listed here are removed from the index.
+  public_security_tags: [open]
+
+  # --- Hierarchy -------------------------------------------------------------
+  # Look up each asset's folder path with the Entity API (one request per asset,
+  # plus one per folder). Gives breadcrumbs, "browse this collection" and
+  # collection records for folders.
+  resolve_hierarchy: true
+  include_folders: true                       # index public folders as collection records
+  skip_top_levels: 0                          # e.g. 1 hides a single administrative root folder
+  collection_from: hierarchy                  # hierarchy (top public folder), mods (relatedItem host) or both
+
+  # --- Thumbnails ------------------------------------------------------------
+  # Download each public entity's thumbnail from the Content API into
+  # thumbnail_dir (relative to this file); the Rails app serves it at /thumbnails.
+  thumbnails: false
+  thumbnail_size: medium                      # small, medium or large
+  thumbnail_dir: thumbnails
+
+  # --- Public links ------------------------------------------------------------
+  # {uuid} is the entity's Preservica reference. Leave empty if you don't have one.
+  landing_url_template: ""                    # e.g. https://<ua-site>/IO_{uuid}/ (Universal Access)
+  folder_landing_url_template: ""             # e.g. https://<ua-site>/SO_{uuid}/
+  thumbnail_url_template: ""                  # public thumbnail URL; overrides the cached thumbnails
+  media_url_template: ""                      # public access copy (e.g. S3/CloudFront) to preview or play
+  iiif_manifest_url_template: ""              # public IIIF Presentation manifest
+
+  # --- Safety ----------------------------------------------------------------
+  # A full harvest stops rather than delete more than this share of the index.
+  max_delete_fraction: 0.2
+  batch_size: 500

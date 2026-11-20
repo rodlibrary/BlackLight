@@ -1,0 +1,43 @@
+<section class="collection-contents card my-4" aria-labelledby="collection-contents-heading">
+  <div class="card-body">
+    <h2 id="collection-contents-heading" class="h5 card-title">In this collection</h2>
+
+    <% if item_count.positive? %>
+      <p class="mb-2">
+        <%= link_to "Browse all #{helpers.number_with_delimiter(item_count)} #{'item'.pluralize(item_count)}",
+                    browse_all_path, class: 'btn btn-primary btn-sm' %>
+        <% if direct_item_count.positive? && direct_item_count != item_count %>
+          <%= link_to "#{helpers.number_with_delimiter(direct_item_count)} directly in this folder",
+                      browse_direct_path, class: 'btn btn-outline-secondary btn-sm ms-1' %>
+        <% end %>
+      </p>
+
+      <form action="<%= helpers.search_catalog_path %>" method="get" role="search" class="mb-3"
+            aria-label="Search within <%= title %>">
+        <input type="hidden" name="f[ancestor_ids_ssim][]" value="<%= id %>">
+        <div class="input-group input-group-sm" style="max-width: 32rem;">
+          <label for="within_q" class="visually-hidden">Search within <%= title %></label>
+          <input type="search" name="q" id="within_q" class="form-control" placeholder="Search within this collection">
+          <button type="submit" class="btn btn-outline-primary">Search</button>
+        </div>
+      </form>
+    <% else %>
+      <p class="text-body-secondary">No public items in this collection yet.</p>
+    <% end %>
+
+    <% if subfolders.documents.any? %>
+      <h3 class="h6 mt-3">Subcollections</h3>
+      <ul class="list-unstyled mb-0 collection-subfolders">
+        <% subfolders.documents.each do |doc| %>
+          <li><%= link_to subfolder_title(doc), helpers.solr_document_path(doc.id) %></li>
+        <% end %>
+      </ul>
+      <% if subfolders.total > subfolders.documents.size %>
+        <p class="small mt-2">
+          <%= link_to "All #{helpers.number_with_delimiter(subfolders.total)} subcollections",
+                      helpers.search_catalog_path(f: { parent_id_ssi: [id], entity_type_ssim: ['Collection'] }, sort: 'title') %>
+        </p>
+      <% end %>
+    <% end %>
+  </div>
+</section>
