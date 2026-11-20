@@ -60,4 +60,6 @@ jobs:
           -H 'Content-Type: application/json' --data-binary @samples/demo-docs.json
         n=$(curl -fsS 'http://localhost:8983/solr/preservica/select?q=flood&rows=0&wt=json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["response"]["numFound"])')
         echo "flood: $n hits"; test "$n" -ge 2
-        curl -fsS 'http://localhost:8983/solr/preservica/suggest?q=Okaf&suggest.build=true' | grep -q Okafor
+        # Suggestions come back lowercased (KeywordTokenizer + LowerCaseFilter in textSuggest).
+        s=$(curl -fsS 'http://localhost:8983/solr/preservica/suggest?q=Okaf&suggest.build=true&wt=json')
+        echo "$s"; echo "$s" | grep -qi okafor
