@@ -60,6 +60,15 @@ Written when `resolve_hierarchy` is on. Only public folders appear.
 | `relation_ssm` | | `dc:relation`, `dc:source` |
 | `full_text_teim` | reserved for OCR / transcripts | |
 
+## Local metadata fragments
+
+Fields named in `local_metadata` (config.yaml), read from metadata fragments
+through the Entity API rather than OAI-PMH.
+
+| Field | Source |
+| --- | --- |
+| `department_ssim` | `department` in the DCDS_local fragment (Institutional Repository items) |
+
 ## Links and media
 
 | Field | Source |

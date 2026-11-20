@@ -26,6 +26,7 @@ DEFAULTS = {
     "media_url_template": "",
     "thumbnail_url_template": "",
     "iiif_manifest_url_template": "",
+    "local_metadata": [],
     "max_delete_fraction": 0.2,
     "batch_size": 500,
     "request_delay": 0.0,

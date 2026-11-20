@@ -33,6 +33,15 @@ preservica:
   oai_set: ""                                 # optional OAI set to limit the harvest
   dc_split: ";"                               # split Dublin Core subjects/languages/coverage on this
 
+  # Local metadata fragments that OAI-PMH doesn't return, read from the Entity
+  # API (needs resolve_hierarchy). Each schema is the fragment's namespace URI;
+  # fields maps an element name in it to a Solr field. Department for
+  # Institutional Repository items comes from the DCDS_local fragment:
+  local_metadata: []
+  #  - schema: "<DCDS_local namespace URI>"
+  #    fields:
+  #      department: department_ssim
+
   # --- What is public -------------------------------------------------------
   # Records whose security tag isn't listed here are removed from the index.
   public_security_tags: [open]

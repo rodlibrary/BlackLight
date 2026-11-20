@@ -5,6 +5,7 @@ Endpoints used (developers.preservica.com):
   GET  {oai_url}?verb=...                                     OAI-PMH data provider
   GET  {base_url}/api/entity/information-objects/{ref}        asset: title, security tag, parent
   GET  {base_url}/api/entity/structural-objects/{ref}         folder: title, description, security tag, parent
+  GET  {base_url}/api/entity/information-objects/{ref}/metadata/{id}   one metadata fragment
   GET  {base_url}/api/content/thumbnail?id=sdb:IO|{ref}&size=medium
 
 Every call runs as the configured service account, so results never include
@@ -112,6 +113,19 @@ class PreservicaClient:
             raise NotVisible(f"{kind}:{ref}")
         if resp.status_code != 200:
             raise HarvestError(f"Entity API returned {resp.status_code} for {kind}:{ref}")
+        return ET.fromstring(resp.content)
+
+    def fragment(self, url: str) -> ET.Element:
+        """A metadata fragment linked from an EntityResponse. Only URLs under this server's Entity API are
+        fetched, so the access token is never sent anywhere else."""
+        prefix = f"{self.base_url}/api/entity/"
+        if not self.base_url or not url.startswith(prefix) or ".." in url:
+            raise HarvestError(f"refusing to fetch metadata fragment outside {prefix}: {url}")
+        resp = self._request(url, timeout=120)
+        if resp.status_code in (403, 404):
+            raise NotVisible(url)
+        if resp.status_code != 200:
+            raise HarvestError(f"Entity API returned {resp.status_code} for {url}")
         return ET.fromstring(resp.content)
 
     # ------------------------------------------------------------------ Content API
