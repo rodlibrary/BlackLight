@@ -1,0 +1,7 @@
+<nav aria-label="Collection hierarchy" class="preservica-breadcrumbs mb-2">
+  <ol class="breadcrumb small mb-0">
+    <% crumbs.each do |id, title| %>
+      <li class="breadcrumb-item"><%= link_to title, path_for(id) %></li>
+    <% end %>
+  </ol>
+</nav>

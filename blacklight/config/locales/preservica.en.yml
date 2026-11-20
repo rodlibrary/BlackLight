@@ -1,0 +1,12 @@
+# Site wording. Edit these rather than the views.
+en:
+  blacklight:
+    application_name: 'Digital Archive'
+  preservica:
+    home:
+      heading: 'Explore the Digital Archive'
+      intro: 'Search and browse the digitized and born-digital collections preserved in our Preservica repository.'
+      collections: 'Collections'
+      all_collections:
+        one: 'See the collection'
+        other: 'See all %{count} collections'

@@ -1,0 +1,32 @@
+# Solr for local development and small deployments.
+#
+#   docker compose up -d solr        # http://localhost:8983/solr/#/preservica
+#
+# The core is created from solr/conf on first start. After changing the
+# configset, recreate it:  docker compose down -v && docker compose up -d solr
+# (then re-run the ingest).
+
+services:
+  solr:
+    image: "solr:${SOLR_VERSION:-9.9}"
+    environment:
+      - SOLR_MODULES=analysis-extras      # ICU analyzers used by schema.xml
+      - SOLR_HEAP=${SOLR_HEAP:-1g}
+    ports:
+      - "127.0.0.1:${SOLR_PORT:-8983}:8983"   # local only; put Solr behind the app, never on the internet
+    volumes:
+      - ./solr/conf:/opt/solr/preservica-conf:ro
+      - solr_data:/var/solr
+    command:
+      - solr-precreate
+      - preservica
+      - /opt/solr/preservica-conf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8983/solr/preservica/admin/ping || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  solr_data:

@@ -1,0 +1,65 @@
+# Checks the Blacklight overlay files. The repository holds only the files that
+# bin/setup_blacklight_app copies into a generated Rails app (there is no
+# Gemfile here), so this checks Ruby, ERB and YAML syntax and validates the
+# Solr configset XML rather than running an app test suite.
+
+name: Blacklight overlay and Solr config
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'   # Blacklight 9 needs Ruby 3.2 or later
+    - name: Check Ruby syntax
+      run: find blacklight -name '*.rb' -print0 | xargs -0 -n1 ruby -wc
+    - name: Check ERB templates compile
+      run: |
+        for f in $(find blacklight -name '*.erb'); do
+          echo "$f"
+          ruby -rerb -e 'puts ERB.new(File.read(ARGV[0]), trim_mode: "-").src' "$f" | ruby -c
+        done
+    - name: Check locale YAML
+      run: for f in blacklight/config/locales/*.yml; do ruby -ryaml -e 'YAML.load_file(ARGV[0])' "$f"; done
+    - name: Check setup script
+      run: bash -n bin/setup_blacklight_app
+    - name: Check Solr configset is well-formed
+      run: |
+        sudo apt-get install -y libxml2-utils >/dev/null
+        xmllint --noout solr/conf/schema.xml solr/conf/solrconfig.xml
+
+  solr:
+    # Starts Solr with the configset and indexes the demo documents.
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Start Solr
+      run: docker compose up -d solr
+    - name: Wait for the core
+      run: |
+        for i in $(seq 1 60); do
+          curl -fs http://localhost:8983/solr/preservica/admin/ping && exit 0
+          sleep 3
+        done
+        docker compose logs solr; exit 1
+    - name: Index demo documents and query them
+      run: |
+        curl -fsS 'http://localhost:8983/solr/preservica/update?commit=true' \
+          -H 'Content-Type: application/json' --data-binary @samples/demo-docs.json
+        n=$(curl -fsS 'http://localhost:8983/solr/preservica/select?q=flood&rows=0&wt=json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["response"]["numFound"])')
+        echo "flood: $n hits"; test "$n" -ge 2
+        # Suggestions come back lowercased (KeywordTokenizer + LowerCaseFilter in textSuggest).
+        s=$(curl -fsS 'http://localhost:8983/solr/preservica/suggest?q=Okaf&suggest.build=true&wt=json')
+        echo "$s"; echo "$s" | grep -qi okafor

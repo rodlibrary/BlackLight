@@ -1,0 +1,58 @@
+<section class="media-preview mb-4" aria-label="Preview">
+  <% if iiif_viewer_src %>
+    <div class="ratio ratio-4x3 mb-2">
+      <iframe src="<%= iiif_viewer_src %>" title="Viewer: <%= title %>" allowfullscreen loading="lazy"></iframe>
+    </div>
+    <p class="small"><%= link_to 'IIIF manifest', iiif_manifest, target: '_blank', rel: 'noopener noreferrer' %></p>
+  <% elsif iiif_manifest.present? %>
+    <p>
+      <%= link_to 'IIIF manifest', iiif_manifest, class: 'btn btn-outline-primary', target: '_blank', rel: 'noopener noreferrer' %>
+    </p>
+  <% elsif media_type == 'image' %>
+    <%= image_tag media_url, alt: title, class: 'img-fluid rounded', style: 'max-height: 600px;', loading: 'lazy' %>
+  <% elsif media_type == 'video' && youtube_id %>
+    <div class="ratio ratio-16x9">
+      <iframe src="https://www.youtube-nocookie.com/embed/<%= youtube_id %>" title="<%= title %>"
+              allowfullscreen loading="lazy"></iframe>
+    </div>
+  <% elsif media_type == 'video' && vimeo_id %>
+    <div class="ratio ratio-16x9">
+      <iframe src="https://player.vimeo.com/video/<%= vimeo_id %>" title="<%= title %>"
+              allowfullscreen loading="lazy"></iframe>
+    </div>
+  <% elsif media_type == 'video' %>
+    <video controls preload="metadata" class="w-100" style="max-height: 480px;" crossorigin="anonymous">
+      <source src="<%= media_url %>">
+      <% if captions_url %>
+        <track kind="captions" src="<%= captions_url %>" srclang="en" label="Captions" default>
+      <% end %>
+      <%= link_to 'Download the video', media_url %>
+    </video>
+  <% elsif media_type == 'audio' %>
+    <%# <audio> can't display captions, so the transcript is offered as a link. %>
+    <audio controls preload="metadata" class="w-100">
+      <source src="<%= media_url %>">
+      <%= link_to 'Download the audio', media_url %>
+    </audio>
+    <% if captions_url %>
+      <p class="small mt-2"><%= link_to 'Transcript (WebVTT)', captions_url, target: '_blank', rel: 'noopener noreferrer' %></p>
+    <% end %>
+  <% elsif media_type == 'pdf' && media_url.present? %>
+    <object data="<%= media_url %>" type="application/pdf" class="w-100" style="height: 600px;" aria-label="<%= title %>">
+      <p>This browser can't show the PDF here. <%= link_to 'Open the PDF', media_url, target: '_blank', rel: 'noopener noreferrer' %>.</p>
+    </object>
+  <% elsif thumbnail_url.present? %>
+    <%= image_tag thumbnail_url, alt: '', class: 'img-fluid rounded border', style: 'max-height: 400px;', loading: 'lazy' %>
+    <% if landing_url %>
+      <p class="mt-2">
+        <%= link_to 'View in Preservica', landing_url, class: 'btn btn-sm btn-primary', target: '_blank', rel: 'noopener noreferrer' %>
+      </p>
+    <% end %>
+  <% end %>
+
+  <% if media_url.present? %>
+    <p class="mt-2">
+      <%= link_to 'Download / view file', media_url, class: 'btn btn-sm btn-primary', target: '_blank', rel: 'noopener noreferrer' %>
+    </p>
+  <% end %>
+</section>

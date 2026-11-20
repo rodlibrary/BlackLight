@@ -1,0 +1,19 @@
+# Local configuration and secrets
+config.yaml
+.env
+
+# Ingest output, checkpoints and cached thumbnails
+data/
+backups/
+.ingest-state/
+thumbnails/
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated Blacklight app (created by bin/setup_blacklight_app)
+preservica_app/

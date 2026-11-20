@@ -1,0 +1,360 @@
+[
+  {
+    "id": "preservica-f0000000-0000-4000-8000-000000000001",
+    "source_ssi": "preservica",
+    "source_ssim": [
+      "Digital Archive"
+    ],
+    "entity_type_ssi": "folder",
+    "entity_type_ssim": [
+      "Collection"
+    ],
+    "preservica_ref_ssi": "f0000000-0000-4000-8000-000000000001",
+    "depth_isi": 0,
+    "resource_type_ssim": [
+      "mixed material"
+    ],
+    "title_tesim": [
+      "University Archives"
+    ],
+    "title_ssort": "University Archives",
+    "abstract_tesim": [
+      "Records of the university."
+    ],
+    "collection_ssim": [
+      "University Archives"
+    ],
+    "collection_id_ssi": "preservica-f0000000-0000-4000-8000-000000000001",
+    "access_status_ssi": "public",
+    "identifier_ssim": [
+      "oai:so:f0000000-0000-4000-8000-000000000001"
+    ],
+    "url_ssi": "https://ua.example.edu/SO_f0000000-0000-4000-8000-000000000001/",
+    "has_thumbnail_bsi": false,
+    "metadata_format_ssi": "entity",
+    "ingest_run_ssi": "demo"
+  },
+  {
+    "id": "preservica-f0000000-0000-4000-8000-000000000004",
+    "source_ssi": "preservica",
+    "source_ssim": [
+      "Digital Archive"
+    ],
+    "entity_type_ssi": "folder",
+    "entity_type_ssim": [
+      "Collection"
+    ],
+    "preservica_ref_ssi": "f0000000-0000-4000-8000-000000000004",
+    "depth_isi": 0,
+    "resource_type_ssim": [
+      "mixed material"
+    ],
+    "title_tesim": [
+      "Public subseries"
+    ],
+    "title_ssort": "Public subseries",
+    "collection_ssim": [
+      "Public subseries"
+    ],
+    "collection_id_ssi": "preservica-f0000000-0000-4000-8000-000000000004",
+    "access_status_ssi": "public",
+    "identifier_ssim": [
+      "oai:so:f0000000-0000-4000-8000-000000000004"
+    ],
+    "url_ssi": "https://ua.example.edu/SO_f0000000-0000-4000-8000-000000000004/",
+    "has_thumbnail_bsi": false,
+    "metadata_format_ssi": "entity",
+    "ingest_run_ssi": "demo"
+  },
+  {
+    "id": "preservica-a0000000-0000-4000-8000-000000000003",
+    "source_ssi": "preservica",
+    "source_ssim": [
+      "Digital Archive"
+    ],
+    "entity_type_ssi": "asset",
+    "entity_type_ssim": [
+      "Item"
+    ],
+    "preservica_ref_ssi": "a0000000-0000-4000-8000-000000000003",
+    "parent_id_ssi": "preservica-f0000000-0000-4000-8000-000000000004",
+    "ancestor_ids_ssim": [
+      "preservica-f0000000-0000-4000-8000-000000000004"
+    ],
+    "ancestor_titles_ssm": [
+      "Public subseries"
+    ],
+    "depth_isi": 1,
+    "resource_type_ssim": [
+      "text"
+    ],
+    "title_tesim": [
+      "Annual report"
+    ],
+    "title_ssort": "Annual report",
+    "date_display_ssm": [
+      "1960-1962"
+    ],
+    "date_sort_dtsi": "1960-01-01T00:00:00Z",
+    "year_isim": [
+      1960,
+      1961,
+      1962
+    ],
+    "language_ssim": [
+      "eng"
+    ],
+    "collection_ssim": [
+      "Public subseries"
+    ],
+    "collection_id_ssi": "preservica-f0000000-0000-4000-8000-000000000004",
+    "access_status_ssi": "public",
+    "identifier_ssim": [
+      "oai:io:a0000000-0000-4000-8000-000000000003"
+    ],
+    "url_ssi": "https://ua.example.edu/IO_a0000000-0000-4000-8000-000000000003/",
+    "has_thumbnail_bsi": false,
+    "metadata_format_ssi": "oai_dc",
+    "ingest_run_ssi": "demo"
+  },
+  {
+    "id": "preservica-f0000000-0000-4000-8000-000000000002",
+    "source_ssi": "preservica",
+    "source_ssim": [
+      "Digital Archive"
+    ],
+    "entity_type_ssi": "folder",
+    "entity_type_ssim": [
+      "Collection"
+    ],
+    "preservica_ref_ssi": "f0000000-0000-4000-8000-000000000002",
+    "parent_id_ssi": "preservica-f0000000-0000-4000-8000-000000000001",
+    "ancestor_ids_ssim": [
+      "preservica-f0000000-0000-4000-8000-000000000001"
+    ],
+    "ancestor_titles_ssm": [
+      "University Archives"
+    ],
+    "depth_isi": 1,
+    "resource_type_ssim": [
+      "mixed material"
+    ],
+    "title_tesim": [
+      "Flood Relief Records"
+    ],
+    "title_ssort": "Flood Relief Records",
+    "collection_ssim": [
+      "University Archives"
+    ],
+    "collection_id_ssi": "preservica-f0000000-0000-4000-8000-000000000001",
+    "access_status_ssi": "public",
+    "identifier_ssim": [
+      "oai:so:f0000000-0000-4000-8000-000000000002"
+    ],
+    "url_ssi": "https://ua.example.edu/SO_f0000000-0000-4000-8000-000000000002/",
+    "has_thumbnail_bsi": false,
+    "metadata_format_ssi": "entity",
+    "ingest_run_ssi": "demo"
+  },
+  {
+    "id": "preservica-a0000000-0000-4000-8000-000000000002",
+    "source_ssi": "preservica",
+    "source_ssim": [
+      "Digital Archive"
+    ],
+    "entity_type_ssi": "asset",
+    "entity_type_ssim": [
+      "Item"
+    ],
+    "preservica_ref_ssi": "a0000000-0000-4000-8000-000000000002",
+    "parent_id_ssi": "preservica-f0000000-0000-4000-8000-000000000002",
+    "ancestor_ids_ssim": [
+      "preservica-f0000000-0000-4000-8000-000000000001",
+      "preservica-f0000000-0000-4000-8000-000000000002"
+    ],
+    "ancestor_titles_ssm": [
+      "University Archives",
+      "Flood Relief Records"
+    ],
+    "depth_isi": 2,
+    "resource_type_ssim": [
+      "still image"
+    ],
+    "title_tesim": [
+      "Sandbagging on Main Street"
+    ],
+    "title_ssort": "Sandbagging on Main Street",
+    "creator_tesim": [
+      "Daily Herald"
+    ],
+    "creator_ssim": [
+      "Daily Herald"
+    ],
+    "creator_ssort": "Daily Herald",
+    "genre_ssim": [
+      "Photographs"
+    ],
+    "subject_tesim": [
+      "Floods",
+      "Volunteers"
+    ],
+    "subject_ssim": [
+      "Floods",
+      "Volunteers"
+    ],
+    "abstract_tesim": [
+      "A crowd fills sandbags."
+    ],
+    "note_tesim": [
+      "Caption on verso."
+    ],
+    "date_display_ssm": [
+      "1952-04-14"
+    ],
+    "date_sort_dtsi": "1952-04-14T00:00:00Z",
+    "year_isim": [
+      1952
+    ],
+    "collection_ssim": [
+      "University Archives"
+    ],
+    "collection_id_ssi": "preservica-f0000000-0000-4000-8000-000000000001",
+    "rights_uri_ssi": "http://rightsstatements.org/vocab/NoC-US/1.0/",
+    "access_status_ssi": "public",
+    "identifier_ssim": [
+      "oai:io:a0000000-0000-4000-8000-000000000002",
+      "10.1234/flood.2"
+    ],
+    "doi_ssi": "10.1234/flood.2",
+    "url_ssi": "https://ua.example.edu/IO_a0000000-0000-4000-8000-000000000002/",
+    "has_thumbnail_bsi": false,
+    "file_format_ssim": [
+      "image/jpeg"
+    ],
+    "metadata_format_ssi": "oai_dc",
+    "ingest_run_ssi": "demo"
+  },
+  {
+    "id": "preservica-f0000000-0000-4000-8000-000000000003",
+    "source_ssi": "preservica",
+    "source_ssim": [
+      "Digital Archive"
+    ],
+    "entity_type_ssi": "folder",
+    "entity_type_ssim": [
+      "Collection"
+    ],
+    "preservica_ref_ssi": "f0000000-0000-4000-8000-000000000003",
+    "parent_id_ssi": "preservica-f0000000-0000-4000-8000-000000000002",
+    "ancestor_ids_ssim": [
+      "preservica-f0000000-0000-4000-8000-000000000001",
+      "preservica-f0000000-0000-4000-8000-000000000002"
+    ],
+    "ancestor_titles_ssm": [
+      "University Archives",
+      "Flood Relief Records"
+    ],
+    "depth_isi": 2,
+    "resource_type_ssim": [
+      "mixed material"
+    ],
+    "title_tesim": [
+      "Series 2: Oral histories"
+    ],
+    "title_ssort": "Series 2: Oral histories",
+    "collection_ssim": [
+      "University Archives"
+    ],
+    "collection_id_ssi": "preservica-f0000000-0000-4000-8000-000000000001",
+    "access_status_ssi": "public",
+    "identifier_ssim": [
+      "oai:so:f0000000-0000-4000-8000-000000000003"
+    ],
+    "url_ssi": "https://ua.example.edu/SO_f0000000-0000-4000-8000-000000000003/",
+    "has_thumbnail_bsi": false,
+    "metadata_format_ssi": "entity",
+    "ingest_run_ssi": "demo"
+  },
+  {
+    "id": "preservica-a0000000-0000-4000-8000-000000000001",
+    "source_ssi": "preservica",
+    "source_ssim": [
+      "Digital Archive"
+    ],
+    "entity_type_ssi": "asset",
+    "entity_type_ssim": [
+      "Item"
+    ],
+    "preservica_ref_ssi": "a0000000-0000-4000-8000-000000000001",
+    "parent_id_ssi": "preservica-f0000000-0000-4000-8000-000000000003",
+    "ancestor_ids_ssim": [
+      "preservica-f0000000-0000-4000-8000-000000000001",
+      "preservica-f0000000-0000-4000-8000-000000000002",
+      "preservica-f0000000-0000-4000-8000-000000000003"
+    ],
+    "ancestor_titles_ssm": [
+      "University Archives",
+      "Flood Relief Records",
+      "Series 2: Oral histories"
+    ],
+    "depth_isi": 3,
+    "resource_type_ssim": [
+      "sound recording"
+    ],
+    "title_tesim": [
+      "Oral history interview with Grace Okafor"
+    ],
+    "title_ssort": "Oral history interview with Grace Okafor",
+    "creator_tesim": [
+      "Okafor, Grace"
+    ],
+    "creator_ssim": [
+      "Okafor, Grace"
+    ],
+    "creator_ssort": "Okafor, Grace",
+    "genre_ssim": [
+      "oral histories"
+    ],
+    "subject_tesim": [
+      "Floods"
+    ],
+    "subject_ssim": [
+      "Floods"
+    ],
+    "place_ssim": [
+      "Riverton (Ohio)"
+    ],
+    "abstract_tesim": [
+      "Recollections of the 1952 flood."
+    ],
+    "date_display_ssm": [
+      "1987-05-03"
+    ],
+    "date_sort_dtsi": "1987-05-03T00:00:00Z",
+    "year_isim": [
+      1987
+    ],
+    "collection_ssim": [
+      "University Archives"
+    ],
+    "collection_id_ssi": "preservica-f0000000-0000-4000-8000-000000000001",
+    "rights_uri_ssi": "http://rightsstatements.org/vocab/InC-EDU/1.0/",
+    "rights_note_ssm": [
+      "In copyright, educational use."
+    ],
+    "access_status_ssi": "public",
+    "identifier_ssim": [
+      "oai:io:a0000000-0000-4000-8000-000000000001",
+      "uni-ms123-0003",
+      "aspace_8f2c1e0a91d2"
+    ],
+    "aspace_ref_ssi": "aspace_8f2c1e0a91d2",
+    "url_ssi": "https://ua.example.edu/IO_a0000000-0000-4000-8000-000000000001/",
+    "has_thumbnail_bsi": false,
+    "metadata_format_ssi": "mods",
+    "ingest_run_ssi": "demo",
+    "alternative_title_tesim": [
+      "Okafor interview"
+    ]
+  }
+]

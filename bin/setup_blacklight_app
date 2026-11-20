@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Generate the Blacklight app (once) and copy this repository's overlay into it.
+#
+#   bin/setup_blacklight_app [APP_DIR]      default APP_DIR: preservica_app
+#
+# Safe to rerun: an existing app is kept and only the overlay files are copied
+# again, so changes made in blacklight/ reach the app.
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+APP_DIR="${1:-preservica_app}"
+
+if [[ ! -d "$APP_DIR" ]]; then
+  echo "Creating Rails app in $APP_DIR ..."
+  rails new "$APP_DIR" --css bootstrap -m "$REPO_DIR/blacklight/template.rb"
+else
+  echo "Using existing app in $APP_DIR"
+fi
+APP_DIR="$(cd "$APP_DIR" && pwd)"
+
+echo "Copying overlay files ..."
+cp -R "$REPO_DIR/blacklight/app/." "$APP_DIR/app/"
+cp -R "$REPO_DIR/blacklight/config/." "$APP_DIR/config/"
+
+# Point Blacklight at the 'preservica' core (SOLR_URL still overrides it).
+if [[ -f "$APP_DIR/config/blacklight.yml" ]]; then
+  sed -i.bak 's#/solr/blacklight-core#/solr/preservica#g' "$APP_DIR/config/blacklight.yml" && rm -f "$APP_DIR/config/blacklight.yml.bak"
+fi
+
+# solr_wrapper (bundle exec solr_wrapper) runs Solr with this repository's configset.
+cat > "$APP_DIR/.solr_wrapper.yml" <<EOF
+# Written by bin/setup_blacklight_app. Uses the configset in $REPO_DIR/solr/conf.
+env:
+  SOLR_MODULES: analysis-extras
+collection:
+  dir: $REPO_DIR/solr/
+  name: preservica
+EOF
+
+# Thumbnails cached by the ingest (thumbnail_dir in config.yaml) are served at /thumbnails.
+THUMB_DIR="${THUMBNAIL_DIR:-$REPO_DIR/thumbnails}"
+mkdir -p "$THUMB_DIR"
+if [[ ! -e "$APP_DIR/public/thumbnails" ]]; then
+  ln -s "$THUMB_DIR" "$APP_DIR/public/thumbnails"
+fi
+
+cat <<EOF
+
+Done. Next:
+  docker compose up -d solr       # from $REPO_DIR, or: cd $APP_DIR && bundle exec solr_wrapper
+  cd $APP_DIR && bin/rails server # http://localhost:3000
+EOF
