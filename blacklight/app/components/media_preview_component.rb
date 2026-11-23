@@ -8,7 +8,10 @@
 # the public site.
 #
 # Order: IIIF manifest (embedded in IIIF_VIEWER_URL if set), access copy from
-# media_url_template, then the Preservica thumbnail as a still preview.
+# media_url_template, then the hand-off to Preservica: the thumbnail with an
+# "Open in Preservica" button to the item's public page (landing_url_template,
+# e.g. Universal Access). The hand-off is the library's chosen access model;
+# the in-site viewers stay available for access copies published elsewhere.
 class MediaPreviewComponent < Blacklight::Component
   YOUTUBE = %r{\Ahttps://(?:www\.)?(?:youtube\.com/watch\?(?:.*&)?v=|youtu\.be/)([\w-]{11})}
   VIMEO = %r{\Ahttps://(?:www\.)?vimeo\.com/(\d+)}
@@ -19,7 +22,22 @@ class MediaPreviewComponent < Blacklight::Component
   end
 
   def render?
-    iiif_manifest.present? || (media_url.present? && media_type.present?) || thumbnail_url.present?
+    iiif_manifest.present? || (media_url.present? && media_type.present?) || landing_url.present? ||
+      thumbnail_url.present?
+  end
+
+  # No viewer on this site: hand the visitor off to Preservica.
+  def handoff?
+    landing_url.present? && iiif_manifest.blank? && !(media_url.present? && media_type.present?)
+  end
+
+  def folder?
+    @document['entity_type_ssi'] == 'folder'
+  end
+
+  # Wording lives in config/locales/preservica.en.yml.
+  def handoff_text(key)
+    helpers.t("preservica.handoff.#{folder? ? 'folder' : 'item'}.#{key}")
   end
 
   # Universal Viewer, Mirador or another viewer that takes the manifest URL at

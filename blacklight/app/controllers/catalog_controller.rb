@@ -64,7 +64,7 @@ class CatalogController < ApplicationController
     config.add_show_field 'file_format_ssim', label: 'File format'
     config.add_show_field 'doi_ssi', label: 'DOI', helper_method: :render_doi_link
     config.add_show_field 'identifier_ssim', label: 'Identifier'
-    config.add_show_field 'url_ssi', label: 'View in Preservica', helper_method: :render_safe_link
+    # url_ssi (the item's Preservica page) is the "Open in Preservica" button in MediaPreviewComponent.
 
     # --- Facets ---------------------------------------------------------------
     config.add_facet_field 'entity_type_ssim', label: 'Show', limit: 5

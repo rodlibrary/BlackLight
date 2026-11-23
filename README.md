@@ -22,8 +22,10 @@ sanitized HTML).
 - On every record, breadcrumbs through the Preservica folders it sits in
 - On a collection (folder) page: its subcollections, "Browse all N items",
   and a search box limited to that collection
-- Thumbnails in results; image, audio, video, PDF or IIIF preview on the record
-  page when you publish access copies or manifests
+- Thumbnails in results. Item and collection pages hand visitors off to
+  Preservica Universal Access with an "Open in Preservica" button (the
+  library's chosen access model), or show an image, audio, video, PDF or IIIF
+  preview instead if access copies or manifests are published elsewhere
 - Bookmarks, search history, citations and autocomplete from Blacklight
 
 ## Repository layout
@@ -144,7 +146,9 @@ All settings are in `config.example.yaml`, with comments. The ones to decide fir
   so the first level users see is your real collections.
 - **`thumbnails`**: download thumbnails into `thumbnail_dir`, which the Rails
   app serves at `/thumbnails` (set `THUMBNAIL_BASE_URL` if a CDN serves them).
-- **Link templates**: if you run Preservica Universal Access, or publish access
+- **Link templates**: set `landing_url_template` (and `folder_landing_url_template`)
+  to your Universal Access URL pattern so item pages hand visitors off to
+  Preservica. If you also publish access
   copies or IIIF manifests, set the `*_url_template` settings so record pages
   link and preview them. Set `IIIF_VIEWER_URL` (e.g.
   `https://uv-v4.netlify.app/#?manifest=`) in the Rails environment to embed a viewer.

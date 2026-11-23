@@ -64,8 +64,13 @@ preservica:
 
   # --- Public links ------------------------------------------------------------
   # {uuid} is the entity's Preservica reference. Leave empty if you don't have one.
-  landing_url_template: ""                    # e.g. https://<ua-site>/IO_{uuid}/ (Universal Access)
-  folder_landing_url_template: ""             # e.g. https://<ua-site>/SO_{uuid}/
+  # The library's access model is a hand-off to Preservica Universal Access:
+  # item and collection pages show an "Open in Preservica" button to these URLs.
+  # Copy the pattern from any published item's address in your Universal Access site.
+  # Rod Library's Universal Access portal. %3A and %7C are the URL-encoded ':' and '|' of "sdb:IO|<uuid>".
+  landing_url_template: "https://uni.access.preservica.com/portal/en-US/asset/sdb%3AIO%7C{uuid}"
+  # Folder pages: copy a folder's address from the portal to fill this in (empty = no button on collection pages).
+  folder_landing_url_template: ""
   thumbnail_url_template: ""                  # public thumbnail URL; overrides the cached thumbnails
   media_url_template: ""                      # public access copy (e.g. S3/CloudFront) to preview or play
   iiif_manifest_url_template: ""              # public IIIF Presentation manifest
