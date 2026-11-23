@@ -280,3 +280,11 @@ def test_incremental_refetches_changed_assets_but_not_folders(tmp_path):
     run({"thumbnails": True, "thumbnail_dir": tmp_path}, client, since="2026-11-01T00:00:00Z")
     assert (tmp_path / f"{A1}.jpg").read_bytes() == b"new"
     assert (tmp_path / f"{R}.jpg").read_bytes() == b"old"
+
+
+def test_universal_access_link_for_rod_library_portal():
+    template = "https://uni.access.preservica.com/portal/en-US/asset/sdb%3AIO%7C{uuid}"
+    records, _, _ = run({"landing_url_template": template, "folder_landing_url_template": ""})
+    assert records[A1].url == f"https://uni.access.preservica.com/portal/en-US/asset/sdb%3AIO%7C{A1}"
+    assert records[A1].to_solr("run")["url_ssi"] == records[A1].url
+    assert records[R].url is None                      # no folder template yet: no button on collection pages

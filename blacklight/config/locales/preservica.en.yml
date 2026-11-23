@@ -1,12 +1,24 @@
 # Site wording. Edit these rather than the views.
 en:
   blacklight:
-    application_name: 'Digital Archive'
+    application_name: 'Digital Collections'
   preservica:
     home:
-      heading: 'Explore the Digital Archive'
+      heading: 'Explore Digital Collections'
       intro: 'Search and browse the digitized and born-digital collections preserved in our Preservica repository.'
       collections: 'Collections'
       all_collections:
         one: 'See the collection'
         other: 'See all %{count} collections'
+    # Item and collection pages: the hand-off to Preservica's public portal (landing_url_template).
+    handoff:
+      new_tab: '(opens in a new tab)'
+      note: 'Opens in a new tab. Close the tab or use Back to return here.'
+      item:
+        heading: 'View this item in Preservica'
+        text: 'The full-resolution file and viewer are in Preservica, the library’s digital preservation system.'
+        button: 'Open in Preservica'
+      folder:
+        heading: 'View this collection in Preservica'
+        text: 'Browse the files in this collection in Preservica, the library’s digital preservation system.'
+        button: 'Open in Preservica'
