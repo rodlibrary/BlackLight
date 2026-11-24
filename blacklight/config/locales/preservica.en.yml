@@ -16,6 +16,8 @@ en:
       whats_here: 'What’s in Digital Collections'
       browse_collections: 'Browse the collections: Special Collections & University Archives and the Institutional Repository'
       viewing_heading: 'Viewing and downloading items'
+      contact_heading: 'Contact us'
+      contact_text: 'Questions about the collections or an item? Email us at'
       viewing_text: 'Use Digital Collections to search and browse. To view or download an item, choose Open in Preservica on its page. The item opens in a new tab in Preservica, the library’s digital preservation system.'
     # Item and collection pages: the hand-off to Preservica's public portal (landing_url_template).
     handoff:
