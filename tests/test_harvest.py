@@ -288,3 +288,20 @@ def test_universal_access_link_for_rod_library_portal():
     assert records[A1].url == f"https://uni.access.preservica.com/portal/en-US/asset/sdb%3AIO%7C{A1}"
     assert records[A1].to_solr("run")["url_ssi"] == records[A1].url
     assert records[R].url is None                      # no folder template yet: no button on collection pages
+
+
+def test_iiif_manifest_index_limits_viewers_to_items_with_manifests(tmp_path):
+    index = tmp_path / "index.json"
+    index.write_text('{"manifests": ["%s"]}' % A2)
+    settings = {"iiif_manifest_url_template": "https://iiif.example.edu/manifests/{uuid}.json",
+                "georeference_url_template": "https://annotations.example.edu/?url={manifest}"}
+    records, _, _ = run(dict(settings, iiif_manifest_index_url=str(index)))
+    assert records[A2].iiif_manifest_url == f"https://iiif.example.edu/manifests/{A2}.json"
+    assert records[A2].georeference_url
+    assert records[A1].iiif_manifest_url is None and records[A1].georeference_url is None
+    assert records[F1].iiif_manifest_url is None
+
+    records, _, _ = run(settings)                                  # no index: every item
+    assert records[A1].iiif_manifest_url
+    records, _, _ = run(dict(settings, iiif_manifest_index_url=str(tmp_path / "missing.json")))
+    assert records[A2].iiif_manifest_url is None                   # unreadable index: none, not broken viewers

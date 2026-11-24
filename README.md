@@ -61,6 +61,7 @@ bin/setup_blacklight_app    generates the app and copies the overlay
 samples/demo-docs.json      seven invented records for trying the interface
 docs/solr-fields.md         field profile
 tests/                      pytest suite (no network or Solr needed)
+iiif/                       serverless IIIF pipeline on AWS (see iiif/README.md)
 ```
 
 ## Requirements
@@ -194,6 +195,15 @@ All settings are in `config.example.yaml`, with comments. The ones to decide fir
   tile servers are for light use; for production set `MAP_TILE_URL` (and
   `MAP_TILE_ATTRIBUTION`) to a tile provider the university uses. Allow these
   hosts if the site sets a Content Security Policy.
+
+## IIIF images and manifests
+
+Preservica Enterprise doesn't publish IIIF, so [`iiif/`](iiif/README.md) adds it on AWS.
+Preservica webhooks and a nightly check queue public image assets. A converter
+(pyPreservica and libvips) makes tiled TIFFs for serverless-iiif and writes IIIF
+Presentation 3 manifests, and CloudFront serves both. Set `iiif_manifest_url_template`
+and `iiif_manifest_index_url` from its outputs. Items in the index then get a viewer (and
+the map overlay); everything else keeps the Open in Preservica hand-off.
 
 ## Deployment notes
 

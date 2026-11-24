@@ -74,7 +74,13 @@ preservica:
   folder_landing_url_template: ""
   thumbnail_url_template: ""                  # public thumbnail URL; overrides the cached thumbnails
   media_url_template: ""                      # public access copy (e.g. S3/CloudFront) to preview or play
-  iiif_manifest_url_template: ""              # public IIIF Presentation manifest
+  # IIIF manifests from the pipeline in iiif/ (see iiif/README.md), e.g.
+  #   iiif_manifest_url_template: "https://iiif.lib.uni.edu/manifests/{uuid}.json"
+  #   iiif_manifest_index_url: "https://iiif.lib.uni.edu/manifests/index.json"
+  # The index lists the items that have a manifest, so only those get a viewer; the rest keep
+  # the "Open in Preservica" hand-off. Leave the index empty only if every item has a manifest.
+  iiif_manifest_url_template: ""
+  iiif_manifest_index_url: ""
   # Georeferenced scanned maps: the IIIF Georeference Annotation for an item, so its page can
   # overlay the map on a modern basemap (Allmaps). {manifest} is the URL-encoded manifest URL.
   # Confirm the right lookup URL with Allmaps before enabling, e.g. an annotations.allmaps.org address.

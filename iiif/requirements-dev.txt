@@ -1,0 +1,5 @@
+-r requirements.txt
+# A prebuilt libvips for laptops and CI (no JPEG 2000; the container's Debian libvips has it).
+pyvips[binary]>=2.2.3
+pytest>=8
+cfn-lint>=1.0

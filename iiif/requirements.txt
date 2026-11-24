@@ -1,0 +1,5 @@
+# The converter, webhook and reconcile functions (one container image, see Dockerfile).
+# pyvips uses the system libvips in the container; for local runs and tests, see requirements-dev.txt.
+pyPreservica>=3.0
+pyvips>=2.2.3
+boto3>=1.34
