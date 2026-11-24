@@ -2,7 +2,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Rod Library Digital Collections - IIIF pipeline. Preservica webhooks and a nightly check queue
-  public image assets; a converter makes tiled TIFFs for serverless-iiif and writes IIIF
+  public image assets; a converter makes tiled TIFFs for serverless-iiif (deployed here from the
+  Serverless Application Repository) and writes IIIF
   Presentation 3 manifests; CloudFront serves both from one address. See iiif/README.md.
 
 Parameters:
@@ -33,12 +34,16 @@ Parameters:
   LandingUrlTemplate:
     Type: String
     Default: "https://uni.access.preservica.com/portal/en-US/asset/sdb%3AIO%7C{uuid}"
+  ServerlessIiifVersion:
+    Type: String
+    Default: "8.0.5"
+    Description: serverless-iiif release from the Serverless Application Repository (check for newer ones)
   ImageOriginDomain:
     Type: String
     Default: ""
     Description: >
-      Host name of the serverless-iiif endpoint (its Lambda function URL or API host, no https://).
-      Leave empty on the first deploy; deploy serverless-iiif against TilesBucket, then update this.
+      Leave empty to deploy serverless-iiif inside this stack (recommended). Set it only to use a
+      serverless-iiif deployed separately: its FunctionDomain output (host name, no https://).
   DomainName:
     Type: String
     Default: ""
@@ -58,7 +63,7 @@ Parameters:
     Description: When the nightly check runs (UTC; 06:00 UTC is midnight in Cedar Falls in winter)
 
 Conditions:
-  HasImageOrigin: !Not [!Equals [!Ref ImageOriginDomain, ""]]
+  CreateServerlessIiif: !Equals [!Ref ImageOriginDomain, ""]
   HasDomain: !And
     - !Not [!Equals [!Ref DomainName, ""]]
     - !Not [!Equals [!Ref CertificateArn, ""]]
@@ -227,6 +232,22 @@ Resources:
       DockerContext: ..
       DockerTag: python3.12-v1
 
+  # ---------------------------------------------------------------- serverless-iiif (Samvera)
+  # Serves /iiif/2/{id} and /iiif/3/{id} from TilesBucket, where {id} is the key minus ".tif".
+  ServerlessIiif:
+    Type: AWS::Serverless::Application
+    Condition: CreateServerlessIiif
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:625046682746:applications/serverless-iiif
+        SemanticVersion: !Ref ServerlessIiifVersion
+      Parameters:
+        SourceBucket: !Ref TilesBucket
+        ResolverTemplate: "%s.tif"
+        # The public host in info.json, so viewers fetch tiles through CloudFront. Without a
+        # DomainName, info.json names the function's own host: it works, but tiles aren't cached.
+        ForceHost: !If [HasDomain, !Ref DomainName, ""]
+
   # ---------------------------------------------------------------- CloudFront: /manifests/* and /iiif/*
   ManifestsOriginAccess:
     Type: AWS::CloudFront::OriginAccessControl
@@ -257,14 +278,14 @@ Resources:
             DomainName: !GetAtt PublicBucket.RegionalDomainName
             OriginAccessControlId: !GetAtt ManifestsOriginAccess.Id
             S3OriginConfig: {OriginAccessIdentity: ""}
-          - !If
-            - HasImageOrigin
-            - Id: images
-              DomainName: !Ref ImageOriginDomain
-              CustomOriginConfig:
-                OriginProtocolPolicy: https-only
-                OriginSSLProtocols: [TLSv1.2]
-            - !Ref AWS::NoValue
+          - Id: images
+            DomainName: !If
+              - CreateServerlessIiif
+              - !GetAtt ServerlessIiif.Outputs.FunctionDomain
+              - !Ref ImageOriginDomain
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols: [TLSv1.2]
         DefaultCacheBehavior:
           TargetOriginId: manifests
           ViewerProtocolPolicy: redirect-to-https
@@ -272,21 +293,21 @@ Resources:
           Compress: true
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6          # Managed-CachingOptimized
           ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c # Managed-SimpleCORS
-        CacheBehaviors: !If
-          - HasImageOrigin
-          - - PathPattern: /iiif/*
-              TargetOriginId: images
-              ViewerProtocolPolicy: redirect-to-https
-              AllowedMethods: [GET, HEAD, OPTIONS]
-              Compress: true
-              CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
-              ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
-          - !Ref AWS::NoValue
+        CacheBehaviors:
+          - PathPattern: /iiif/*
+            TargetOriginId: images
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD, OPTIONS]
+            Compress: true
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+            ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
 
 Outputs:
   TilesBucketName:
-    Description: Give this to serverless-iiif as its SourceBucket
+    Description: serverless-iiif's SourceBucket
     Value: !Ref TilesBucket
+  ImageApiV3:
+    Value: !If [HasDomain, !Sub "https://${DomainName}/iiif/3", !Sub "https://${Distribution.DomainName}/iiif/3"]
   PublicBucketName:
     Value: !Ref PublicBucket
   WebhookUrl:

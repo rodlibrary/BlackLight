@@ -49,16 +49,18 @@ You need the AWS SAM CLI, Docker, and an AWS account.
 1. **Secrets** in Secrets Manager:
    - `preservica/iiif-service-account`, JSON `{"username": "...", "password": "..."}`
    - `preservica/webhook-secret`, a long random string
-2. **This stack:** `cd iiif && sam build && sam deploy --guided`. Leave `ImageOriginDomain`
-   empty this first time. Note the `TilesBucketName` output.
-3. **serverless-iiif:** deploy it from the AWS Serverless Application Repository (or its
-   CloudFormation or Terraform), with `SourceBucket` set to `TilesBucketName`. Check its README
-   for the current version and settings.
-4. **Connect them:** run `sam deploy` again, with `ImageOriginDomain` set to serverless-iiif's
-   endpoint host. Optionally set `DomainName` (e.g. `iiif.lib.uni.edu`) and a us-east-1
-   `CertificateArn`, then add a DNS CNAME pointing at the distribution. Check that
-   `https://<host>/iiif/3/<id>/info.json` answers once an image has been converted.
-5. **Webhooks** (Preservica 6.8 or later, run by an account with the repository manager role):
+2. **Deploy:** run `cd iiif && sam build && sam deploy --guided`. This also deploys
+   serverless-iiif 8.0.5 from the Serverless Application Repository, reading the stack's tiles
+   bucket. It serves Image API 2.1 at `/iiif/2/{id}` and 3.0 at `/iiif/3/{id}`. Check the
+   repository for a newer release and set `ServerlessIiifVersion`.
+3. **Public address:** for production, set `DomainName` (e.g. `iiif.lib.uni.edu`) and a
+   us-east-1 `CertificateArn`, then add a DNS CNAME pointing at the distribution.
+   serverless-iiif's `ForceHost` is set to the same name, so `info.json` sends viewers through
+   CloudFront. Without a domain the stack still works, but tiles skip the cache.
+4. **Check it:** once an image has been converted, `https://<host>/iiif/3/<uuid>_0001/info.json`
+   should answer. To use a serverless-iiif deployed separately instead, set
+   `ImageOriginDomain` to its `FunctionDomain` output.
+5. **Webhooks** (Preservica 6.8 or later; Rod Library runs 9.4.0; run by an account with the repository manager role):
 
    ```bash
    export PRESERVICA_SERVER=… PRESERVICA_TENANT=… WEBHOOK_SECRET=…   # plus pyPreservica's credentials
