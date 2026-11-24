@@ -120,18 +120,16 @@ class CatalogController < ApplicationController
     config.add_sort_field 'creator', sort: 'creator_ssort asc, title_ssort asc', label: 'Creator A-Z'
 
     # --- Tools ----------------------------------------------------------------
-    config.add_results_document_tool(:bookmark, component: Blacklight::Document::BookmarkComponent, if: :render_bookmarks_control?)
+    # No bookmarks, search history or logins: the library chose a public site without accounts.
     config.add_results_collection_tool(:sort_widget)
     config.add_results_collection_tool(:per_page_widget)
     config.add_results_collection_tool(:view_type_group)
 
-    config.add_show_tools_partial(:bookmark, component: Blacklight::Document::BookmarkComponent, if: :render_bookmarks_control?)
     config.add_show_tools_partial(:citation)
     # Email and SMS need a configured mailer/SMS gateway; enable them once one exists:
     # config.add_show_tools_partial(:email, callback: :email_action, validator: :email_params_valid?)
 
     config.add_nav_action(:about, partial: 'shared/about_nav')
-    config.add_nav_action(:bookmark, partial: 'blacklight/nav/bookmark', if: :render_bookmarks_control?)
 
     config.spell_max = 5
     config.autocomplete_enabled = true

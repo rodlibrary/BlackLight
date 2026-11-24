@@ -1,6 +1,6 @@
 # Interface prototype
 
-Screenshots of the Rod Library Digital Collections interface prototype. The header links are About and Bookmarks. They're
+Screenshots of the Rod Library Digital Collections interface prototype. The header has one link, About; the site has no logins or bookmarks. They're
 taken from the clickable design canvas, where reviewers can try the facets,
 sorting, list/gallery view and the collection tree:
 [Digital Collections prototype](https://claude.ai/artifact/Nt4kCfCB8Nqw7WZHaUvpCQ)
