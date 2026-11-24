@@ -79,6 +79,10 @@ through the Entity API rather than OAI-PMH.
 | `thumbnail_file_ssi` | thumbnail cached from the Content API (`thumbnails: true`) |
 | `has_thumbnail_bsi` | either of the above |
 | `iiif_manifest_ssi` | `iiif_manifest_url_template` |
+| `georeference_url_ssi` | `georeference_url_template`: IIIF Georeference Annotation for a scanned map (Allmaps) |
+| `coordinates_srpt` | map points `lat,lon` (spatial index: "Search this area") from MODS cartographics, DC coverage or DCDS_local |
+| `coordinates_ssm` | the same points, stored for display |
+| `has_coordinates_bsi` | record has at least one point (Location facet, Map page) |
 | `captions_url_ssi` | WebVTT captions (not yet populated) |
 
 Only absolute `http(s)` URLs are stored.

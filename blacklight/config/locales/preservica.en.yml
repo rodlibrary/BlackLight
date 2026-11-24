@@ -24,6 +24,23 @@ en:
       contact_heading: 'Contact us'
       contact_text: 'Questions about the collections or an item? Email us at'
       viewing_text: 'Use Digital Collections to search and browse. To view or download an item, choose Open in Preservica on its page. The item opens in a new tab in Preservica, the library’s digital preservation system.'
+    map:
+      title: 'Map'
+      link: 'Map'
+      show_list: 'Show as a list'
+      count:
+        zero: 'No records in this search have a location.'
+        one: '1 record with a location.'
+        other: '%{count} records with locations.'
+      too_many: 'The map shows the first %{max}; search or zoom in to narrow it.'
+      in_area: 'Limited to the map area.'
+      clear_area: 'Clear area'
+      search_area: 'Search this area'
+      item_heading: 'Location'
+      georef_heading: 'Map overlay'
+      opacity: 'Overlay transparency'
+      allmaps_viewer: 'Open in Allmaps Viewer'
+      georef_failed: 'The georeferenced map could not be loaded.'
     # Item and collection pages: the hand-off to Preservica's public portal (landing_url_template).
     handoff:
       new_tab: '(opens in a new tab)'

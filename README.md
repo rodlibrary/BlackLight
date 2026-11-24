@@ -26,6 +26,11 @@ sanitized HTML).
   Preservica Universal Access with an "Open in Preservica" button (the
   library's chosen access model), or show an image, audio, video, PDF or IIIF
   preview instead if access copies or manifests are published elsewhere
+- **Map** (/map), linked beside the search results: records with coordinates as
+  pins, with "Search this area"; a "Location: On the map" facet; a small map on
+  each record page with a location; and, for georeferenced scanned maps, the map
+  overlaid on a modern basemap with Allmaps (transparency slider, link to the
+  Allmaps Viewer)
 - Advanced search (/advanced), linked beside the search bar: one box per search field, plus checkbox limits. Citations and autocomplete from Blacklight. There are no logins, bookmarks or search history: the site has no user accounts.
 
 ## Repository layout
@@ -174,6 +179,21 @@ All settings are in `config.example.yaml`, with comments. The ones to decide fir
 - **Secrets stay out of files.** `config.yaml` refers to `${ENV_VARS}` and is in `.gitignore`.
 - **Harvested HTML is sanitized.** Descriptions and notes render through an
   allowlist; nothing from Preservica is marked `html_safe`.
+
+## Maps
+
+- **Coordinates** come from MODS `subject/cartographics/coordinates`, Dublin Core
+  `coverage` values that are points, or a DCDS_local element mapped to
+  `coordinates` in `local_metadata`. Accepted forms: `42.51, -92.46`,
+  `42.51N 92.46W`, `POINT(-92.46 42.51)`, and decimal bounding boxes (centre point).
+- **Georeferenced maps**: set `iiif_manifest_url_template` and
+  `georeference_url_template` (the item's IIIF Georeference Annotation, for
+  example from Allmaps). Record pages then overlay the scanned map.
+- **Outside services** the browser loads: Leaflet and the Allmaps plugin from
+  cdn.jsdelivr.net, and map tiles from tile.openstreetmap.org. OpenStreetMap's
+  tile servers are for light use; for production set `MAP_TILE_URL` (and
+  `MAP_TILE_ATTRIBUTION`) to a tile provider the university uses. Allow these
+  hosts if the site sets a Content Security Policy.
 
 ## Deployment notes
 

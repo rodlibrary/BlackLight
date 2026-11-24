@@ -41,6 +41,7 @@ preservica:
   #  - schema: "<DCDS_local namespace URI>"
   #    fields:
   #      department: department_ssim
+  #      coordinates: coordinates          # optional: map points kept in DCDS_local
 
   # --- What is public -------------------------------------------------------
   # Records whose security tag isn't listed here are removed from the index.
@@ -74,6 +75,10 @@ preservica:
   thumbnail_url_template: ""                  # public thumbnail URL; overrides the cached thumbnails
   media_url_template: ""                      # public access copy (e.g. S3/CloudFront) to preview or play
   iiif_manifest_url_template: ""              # public IIIF Presentation manifest
+  # Georeferenced scanned maps: the IIIF Georeference Annotation for an item, so its page can
+  # overlay the map on a modern basemap (Allmaps). {manifest} is the URL-encoded manifest URL.
+  # Confirm the right lookup URL with Allmaps before enabling, e.g. an annotations.allmaps.org address.
+  georeference_url_template: ""
 
   # --- Safety ----------------------------------------------------------------
   # A full harvest stops rather than delete more than this share of the index.

@@ -27,6 +27,9 @@ ROUTES="$APP_DIR/config/routes.rb"
 if ! grep -q "pages#about" "$ROUTES"; then
   sed -i.bak "s/^Rails.application.routes.draw do$/&\n  get 'about', to: 'pages#about', as: :about/" "$ROUTES" && rm -f "$ROUTES.bak"
 fi
+if ! grep -q "map#index" "$ROUTES"; then
+  sed -i.bak "s/^Rails.application.routes.draw do$/&\n  get 'map', to: 'map#index', as: :map/" "$ROUTES" && rm -f "$ROUTES.bak"
+fi
 
 # Point Blacklight at the 'preservica' core (SOLR_URL still overrides it).
 if [[ -f "$APP_DIR/config/blacklight.yml" ]]; then

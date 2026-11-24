@@ -60,6 +60,12 @@ jobs:
           -H 'Content-Type: application/json' --data-binary @samples/demo-docs.json
         n=$(curl -fsS 'http://localhost:8983/solr/preservica/select?q=flood&rows=0&wt=json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["response"]["numFound"])')
         echo "flood: $n hits"; test "$n" -ge 2
+        # Map search: records with coordinates, and a "search this area" box (lower-left TO upper-right).
+        m=$(curl -fsS 'http://localhost:8983/solr/preservica/select?q=*:*&rows=0&wt=json&fq=has_coordinates_bsi:true' | python3 -c 'import json,sys; print(json.load(sys.stdin)["response"]["numFound"])')
+        echo "with coordinates: $m"; test "$m" -eq 2
+        a=$(curl -fsS -G 'http://localhost:8983/solr/preservica/select' --data-urlencode 'q=*:*' --data-urlencode 'rows=0' --data-urlencode 'wt=json' \
+          --data-urlencode 'fq=coordinates_srpt:[42.50,-92.50 TO 42.60,-92.40]' | python3 -c 'import json,sys; print(json.load(sys.stdin)["response"]["numFound"])')
+        echo "in the Cedar Falls box: $a"; test "$a" -eq 1
         # Suggestions come back lowercased (KeywordTokenizer + LowerCaseFilter in textSuggest).
         s=$(curl -fsS 'http://localhost:8983/solr/preservica/suggest?q=Okaf&suggest.build=true&wt=json')
         echo "$s"; echo "$s" | grep -qi okafor
