@@ -1,0 +1,21 @@
+<% content_for(:page_title) { t('preservica.about.title') } %>
+
+<div class="col-lg-9 py-3">
+  <h1 class="mb-4"><%= t('preservica.about.title') %></h1>
+
+  <%# Text from the Universal Access portal's About page (uni.access.preservica.com/portal/en-US/about-us). %>
+  <p class="lead">Rod Library’s digital collections include material that is either born-digital or digitized according to prevailing standards, described using metadata standards to facilitate discovery, preserved in recommended formats to enable long-term accessibility, and, finally, published online for teaching, learning, and research.</p>
+  <p>Digital collections encompass a wide variety of formats, including photographs, print materials, moving images, audio recordings, artworks, objects, and much more. Our digital collections are created to support student success, facilitate learning and research, advance information literacy, and increase access to rare or fragile items that may be too delicate to be handled.</p>
+  <p>Rod Library offers public access to a wide range of information, including rare books, manuscripts, and institutional records in Special Collections &amp; University Archives; ethnographic materials in the UNI Museum; and creative and scholarly works in Digital Scholarship. For more information about our collections or units, please visit the <%= link_to 'Distinctive Collections and Digital Strategies LibGuide', 'https://guides.lib.uni.edu/dcds' %>.</p>
+  <div class="border-start border-4 border-warning bg-body-tertiary px-3 py-2 mb-4">
+    Materials in Rod Library’s Digital Collections should be evaluated in the context of the period in which they were created. Rod Library does not endorse views expressed in such materials.
+  </div>
+
+  <h2 class="h3 mt-4"><%= t('preservica.about.whats_here') %></h2>
+  <p><%= link_to t('preservica.about.browse_collections'), search_catalog_path(f: { level: ['top'] }, sort: 'title') %></p>
+
+  <h2 class="h3 mt-4"><%= t('preservica.about.viewing_heading') %></h2>
+  <p><%= t('preservica.about.viewing_text') %></p>
+
+  <%# TODO (library): add "Using the collections" (permissions and reproduction policy) and "Contact us" sections. %>
+</div>

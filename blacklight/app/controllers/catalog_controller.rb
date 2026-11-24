@@ -130,7 +130,7 @@ class CatalogController < ApplicationController
     # Email and SMS need a configured mailer/SMS gateway; enable them once one exists:
     # config.add_show_tools_partial(:email, callback: :email_action, validator: :email_params_valid?)
 
-    config.add_nav_action(:collections, partial: 'shared/collections_nav')
+    config.add_nav_action(:about, partial: 'shared/about_nav')
     config.add_nav_action(:bookmark, partial: 'blacklight/nav/bookmark', if: :render_bookmarks_control?)
     config.add_nav_action(:search_history, partial: 'blacklight/nav/search_history')
 

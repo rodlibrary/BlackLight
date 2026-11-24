@@ -10,6 +10,13 @@ en:
       all_collections:
         one: 'See the collection'
         other: 'See all %{count} collections'
+    about:
+      nav: 'About'
+      title: 'About Digital Collections'
+      whats_here: 'What’s in Digital Collections'
+      browse_collections: 'Browse the collections: Special Collections & University Archives and the Institutional Repository'
+      viewing_heading: 'Viewing and downloading items'
+      viewing_text: 'Use Digital Collections to search and browse. To view or download an item, choose Open in Preservica on its page. The item opens in a new tab in Preservica, the library’s digital preservation system.'
     # Item and collection pages: the hand-off to Preservica's public portal (landing_url_template).
     handoff:
       new_tab: '(opens in a new tab)'
