@@ -22,6 +22,12 @@ echo "Copying overlay files ..."
 cp -R "$REPO_DIR/blacklight/app/." "$APP_DIR/app/"
 cp -R "$REPO_DIR/blacklight/config/." "$APP_DIR/config/"
 
+# Routes for the overlay's static pages (added once; the rest of routes.rb is Blacklight's).
+ROUTES="$APP_DIR/config/routes.rb"
+if ! grep -q "pages#about" "$ROUTES"; then
+  sed -i.bak "s/^Rails.application.routes.draw do$/&\n  get 'about', to: 'pages#about', as: :about/" "$ROUTES" && rm -f "$ROUTES.bak"
+fi
+
 # Point Blacklight at the 'preservica' core (SOLR_URL still overrides it).
 if [[ -f "$APP_DIR/config/blacklight.yml" ]]; then
   sed -i.bak 's#/solr/blacklight-core#/solr/preservica#g' "$APP_DIR/config/blacklight.yml" && rm -f "$APP_DIR/config/blacklight.yml.bak"

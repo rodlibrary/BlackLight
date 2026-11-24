@@ -7,7 +7,9 @@
 gem 'blacklight', '~> 9.2'
 
 after_bundle do
-  auth = Rails.gem_version >= Gem::Version.new('8.0.0') ? '--authentication' : '--devise'
-  generate 'blacklight:install', ENV.fetch('BLACKLIGHT_INSTALL_OPTIONS', auth)
+  # No logins: the site has no bookmarks or accounts, so Blacklight is installed
+  # without an authentication option (neither --devise nor --authentication).
+  # Set BLACKLIGHT_INSTALL_OPTIONS to add one later.
+  generate 'blacklight:install', ENV.fetch('BLACKLIGHT_INSTALL_OPTIONS', '')
   rake 'db:migrate'
 end

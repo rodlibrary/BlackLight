@@ -2,14 +2,28 @@
 en:
   blacklight:
     application_name: 'Digital Collections'
+    advanced_search:
+      more_options: 'Advanced search'
   preservica:
     home:
       heading: 'Explore Digital Collections'
       intro: 'Search and browse the digitized and born-digital collections preserved in our Preservica repository.'
       collections: 'Collections'
+      browse_all: 'Browse all'
       all_collections:
         one: 'See the collection'
         other: 'See all %{count} collections'
+    about:
+      nav: 'About'
+      title: 'About Digital Collections'
+      whats_here: 'What’s in Digital Collections'
+      browse_collections: 'Browse the collections: Special Collections & University Archives and the Institutional Repository'
+      viewing_heading: 'Viewing and downloading items'
+      more_heading: 'For more information'
+      more_text: 'See the'
+      contact_heading: 'Contact us'
+      contact_text: 'Questions about the collections or an item? Email us at'
+      viewing_text: 'Use Digital Collections to search and browse. To view or download an item, choose Open in Preservica on its page. The item opens in a new tab in Preservica, the library’s digital preservation system.'
     # Item and collection pages: the hand-off to Preservica's public portal (landing_url_template).
     handoff:
       new_tab: '(opens in a new tab)'

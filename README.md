@@ -18,7 +18,7 @@ sanitized HTML).
 
 - Keyword, title, creator, subject and full-text search with facets for kind
   (item or collection), collection, type, creator, subject, place, genre, year and language
-- Home page listing the top-level collections; a **Collections** link in the navigation bar
+- Home page listing the top-level collections; an **About** page (/about), linked from the header
 - On every record, breadcrumbs through the Preservica folders it sits in
 - On a collection (folder) page: its subcollections, "Browse all N items",
   and a search box limited to that collection
@@ -26,7 +26,7 @@ sanitized HTML).
   Preservica Universal Access with an "Open in Preservica" button (the
   library's chosen access model), or show an image, audio, video, PDF or IIIF
   preview instead if access copies or manifests are published elsewhere
-- Bookmarks, search history, citations and autocomplete from Blacklight
+- Advanced search (/advanced), linked beside the search bar: one box per search field, plus checkbox limits. Citations and autocomplete from Blacklight. There are no logins, bookmarks or search history: the site has no user accounts.
 
 ## Repository layout
 
@@ -50,7 +50,7 @@ blacklight/                 files copied into the generated Rails app
   app/controllers/catalog_controller.rb
   app/components/           breadcrumbs, collection contents, media preview
   app/helpers/application_helper.rb
-  app/views/                home page, Collections nav link
+  app/views/                home page, About page and its header link
   config/locales/           site name and wording
 bin/setup_blacklight_app    generates the app and copies the overlay
 samples/demo-docs.json      seven invented records for trying the interface
