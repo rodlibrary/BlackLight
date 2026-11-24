@@ -19,24 +19,28 @@
 
   <%# TODO (library): add "Using the collections" (permissions and reproduction policy). %>
 
-  <h2 class="h3 mt-4"><%= t('preservica.about.technology_heading') %></h2>
-  <p>Digital Collections is built from open standards and open-source software, most of it shared and maintained by libraries and archives around the world.</p>
-  <dl>
-    <dt class="mt-3"><%= link_to 'Preservica', 'https://preservica.com/' %></dt>
-    <dd class="mb-0">The library’s digital preservation system and the home of every item. It stores the original files, checks them regularly so they stay intact, and keeps them readable as file formats change. Its public portal, Universal Access, is where you view and download items.</dd>
-    <dt class="mt-3"><%= link_to 'Blacklight', 'https://projectblacklight.org/' %></dt>
-    <dd class="mb-0">Open-source discovery software used by many university libraries. It provides this site’s search box, filters, collection pages, item pages and map. It is built with Ruby on Rails.</dd>
-    <dt class="mt-3"><%= link_to 'Apache Solr', 'https://solr.apache.org/' %></dt>
-    <dd class="mb-0">An open-source search engine. It holds an index of the descriptions of public items, so searches, filters and sorting are fast. It holds descriptions only, not the files themselves.</dd>
-    <dt class="mt-3">Harvester</dt>
-    <dd class="mb-0">A small Python program written for Rod Library. Each night it copies the descriptions of public items from Preservica into Solr, along with the folder structure and thumbnail images. Items that are restricted or withdrawn in Preservica are removed from this site.</dd>
-    <dt class="mt-3"><%= link_to 'MODS and Dublin Core', 'https://www.loc.gov/standards/mods/' %></dt>
-    <dd class="mb-0">Metadata standards for describing items: titles, names, dates, subjects, places and rights. They supply the filters on the search page, such as Name, Genre, Subject and Date.</dd>
-    <dt class="mt-3"><%= link_to 'IIIF and serverless-iiif', 'https://iiif.io/' %></dt>
-    <dd class="mb-0">The International Image Interoperability Framework is a shared standard for delivering images online. We are introducing it, with Samvera’s serverless-iiif running on Amazon Web Services, so images can open in a zoomable viewer here and be used in other IIIF tools.</dd>
-    <dt class="mt-3"><%= link_to 'Leaflet, OpenStreetMap and Allmaps', 'https://leafletjs.com/' %></dt>
-    <dd class="mb-0">Leaflet draws the maps, using OpenStreetMap’s street map. Photographs with locations appear as points on the Map page. Allmaps lays georeferenced historical maps over the modern map.</dd>
-  </dl>
+  <%# Boxed to set it apart from the description of the collections; top rule in Panther Purple. %>
+  <section aria-labelledby="about-technology" class="bg-body-tertiary border rounded-3 p-4 mt-4"
+           style="border-top: 4px solid #500778 !important;">
+    <h2 id="about-technology" class="h3"><%= t('preservica.about.technology_heading') %></h2>
+    <p>Digital Collections is built from open standards and open-source software, most of it shared and maintained by libraries and archives around the world.</p>
+    <dl class="mb-0">
+      <dt class="mt-3"><%= link_to 'Preservica', 'https://preservica.com/' %></dt>
+      <dd class="mb-0">The library’s digital preservation system and the home of every item. It stores the original files, checks them regularly so they stay intact, and keeps them readable as file formats change. Its public portal, Universal Access, is where you view and download items.</dd>
+      <dt class="mt-3"><%= link_to 'Blacklight', 'https://projectblacklight.org/' %></dt>
+      <dd class="mb-0">Open-source discovery software used by many university libraries. It provides this site’s search box, filters, collection pages, item pages and map. It is built with Ruby on Rails.</dd>
+      <dt class="mt-3"><%= link_to 'Apache Solr', 'https://solr.apache.org/' %></dt>
+      <dd class="mb-0">An open-source search engine. It holds an index of the descriptions of public items, so searches, filters and sorting are fast. It holds descriptions only, not the files themselves.</dd>
+      <dt class="mt-3">Harvester</dt>
+      <dd class="mb-0">A small Python program written for Rod Library. Each night it copies the descriptions of public items from Preservica into Solr, along with the folder structure and thumbnail images. Items that are restricted or withdrawn in Preservica are removed from this site.</dd>
+      <dt class="mt-3"><%= link_to 'MODS and Dublin Core', 'https://www.loc.gov/standards/mods/' %></dt>
+      <dd class="mb-0">Metadata standards for describing items: titles, names, dates, subjects, places and rights. They supply the filters on the search page, such as Name, Genre, Subject and Date.</dd>
+      <dt class="mt-3"><%= link_to 'IIIF and serverless-iiif', 'https://iiif.io/' %></dt>
+      <dd class="mb-0">The International Image Interoperability Framework is a shared standard for delivering images online. We are introducing it, with Samvera’s serverless-iiif running on Amazon Web Services, so images can open in a zoomable viewer here and be used in other IIIF tools.</dd>
+      <dt class="mt-3"><%= link_to 'Leaflet, OpenStreetMap and Allmaps', 'https://leafletjs.com/' %></dt>
+      <dd class="mb-0">Leaflet draws the maps, using OpenStreetMap’s street map. Photographs with locations appear as points on the Map page. Allmaps lays georeferenced historical maps over the modern map.</dd>
+    </dl>
+  </section>
 
   <h2 class="h3 mt-4"><%= t('preservica.about.more_heading') %></h2>
   <p><%= t('preservica.about.more_text') %> <%= link_to 'Distinctive Collections and Digital Strategies LibGuide', 'https://guides.lib.uni.edu/dcds' %>.</p>
