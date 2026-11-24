@@ -7,6 +7,7 @@ en:
       heading: 'Explore Digital Collections'
       intro: 'Search and browse the digitized and born-digital collections preserved in our Preservica repository.'
       collections: 'Collections'
+      browse_all: 'Browse all'
       all_collections:
         one: 'See the collection'
         other: 'See all %{count} collections'
