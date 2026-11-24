@@ -17,3 +17,6 @@ __pycache__/
 
 # Generated Blacklight app (created by bin/setup_blacklight_app)
 preservica_app/
+
+# AWS SAM build output (iiif/)
+.aws-sam/

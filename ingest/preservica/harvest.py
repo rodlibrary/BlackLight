@@ -10,6 +10,7 @@ Breadcrumbs include only public folders (see hierarchy.py).
 """
 from __future__ import annotations
 
+import json
 import logging
 import re
 import xml.etree.ElementTree as ET
@@ -60,6 +61,30 @@ def prefixes(settings: dict) -> list[str]:
     return [p] if isinstance(p, str) else list(p)
 
 
+def load_manifest_index(location: str | None) -> set[str] | None:
+    """The refs with a IIIF manifest, from the IIIF pipeline's manifests/index.json (a URL or a file).
+    None = no index configured, so the manifest template applies to every item."""
+    if not location:
+        return None
+    try:
+        if re.match(r"^https?://", location):
+            import requests
+
+            r = requests.get(location, timeout=60)
+            r.raise_for_status()
+            data = r.json()
+        else:
+            with open(location, encoding="utf-8") as fh:
+                data = json.load(fh)
+        refs = set(data.get("manifests") or [])
+    except Exception as exc:
+        # Better no viewers for one night than viewers pointing at manifests that don't exist.
+        log.warning("couldn't read the IIIF manifest index %s (%s); no manifests this run", location, exc)
+        return set()
+    log.info("IIIF manifest index: %d items", len(refs))
+    return refs
+
+
 class Harvester:
     def __init__(self, settings: dict, source: str, client: PreservicaClient | None = None, *,
                  since: str | None = None, dry_run: bool = False, refresh_thumbnails: bool = False):
@@ -77,6 +102,7 @@ class Harvester:
         self.chain_folders: dict[str, EntityInfo] = {}   # public folders that appear in breadcrumbs
         self.split_on = settings.get("dc_split", ";") or None
         self.local = validate_local(settings.get("local_metadata") or [])
+        self.iiif_refs = load_manifest_index(settings.get("iiif_manifest_index_url"))
         if self.local and not self.hierarchy:
             log.warning("local_metadata needs resolve_hierarchy: true (it reads the Entity API); ignored")
             self.local = []
@@ -209,7 +235,8 @@ class Harvester:
         for point in parse_points(local.pop("coordinates", [])):
             if point not in coordinates:
                 coordinates.append(point)
-        manifest = None if is_folder else _fill(self.s.get("iiif_manifest_url_template"), **values)
+        has_manifest = not is_folder and (self.iiif_refs is None or ref in self.iiif_refs)
+        manifest = _fill(self.s.get("iiif_manifest_url_template"), **values) if has_manifest else None
         georef = (_fill(self.s.get("georeference_url_template"), uuid=ref, manifest=quote(manifest, safe=""))
                   if manifest else None)
 

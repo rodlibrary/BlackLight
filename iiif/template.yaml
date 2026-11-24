@@ -1,0 +1,313 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Rod Library Digital Collections - IIIF pipeline. Preservica webhooks and a nightly check queue
+  public image assets; a converter makes tiled TIFFs for serverless-iiif and writes IIIF
+  Presentation 3 manifests; CloudFront serves both from one address. See iiif/README.md.
+
+Parameters:
+  PreservicaServer:
+    Type: String
+    Description: Preservica host name, e.g. uni.preservica.com (no https://)
+  PreservicaTenant:
+    Type: String
+    Description: Preservica tenant
+  PreservicaSecretArn:
+    Type: String
+    Description: >
+      Secrets Manager secret, JSON {"username": ..., "password": ...}, for a read-only service account
+      that sees only public material (the same account the catalog ingest uses)
+  WebhookSecretArn:
+    Type: String
+    Description: Secrets Manager secret (plain text) shared with the Preservica webhook subscriptions
+  PublicSecurityTags:
+    Type: String
+    Default: open
+    Description: Comma-separated security tags that are public (same as the ingest's public_security_tags)
+  RootFolders:
+    Type: String
+    Default: ""
+    Description: >
+      Comma-separated folder refs the nightly check walks (e.g. Institutional Repository and Special
+      Collections & University Archives). Empty = the whole repository.
+  LandingUrlTemplate:
+    Type: String
+    Default: "https://uni.access.preservica.com/portal/en-US/asset/sdb%3AIO%7C{uuid}"
+  ImageOriginDomain:
+    Type: String
+    Default: ""
+    Description: >
+      Host name of the serverless-iiif endpoint (its Lambda function URL or API host, no https://).
+      Leave empty on the first deploy; deploy serverless-iiif against TilesBucket, then update this.
+  DomainName:
+    Type: String
+    Default: ""
+    Description: Optional public host name, e.g. iiif.lib.uni.edu (needs CertificateArn and a DNS CNAME)
+  CertificateArn:
+    Type: String
+    Default: ""
+    Description: ACM certificate in us-east-1 for DomainName
+  ConverterConcurrency:
+    Type: Number
+    Default: 5
+    MinValue: 2
+    Description: Converters running at once; keeps the load on Preservica's API modest
+  ReconcileSchedule:
+    Type: String
+    Default: "cron(0 6 * * ? *)"
+    Description: When the nightly check runs (UTC; 06:00 UTC is midnight in Cedar Falls in winter)
+
+Conditions:
+  HasImageOrigin: !Not [!Equals [!Ref ImageOriginDomain, ""]]
+  HasDomain: !And
+    - !Not [!Equals [!Ref DomainName, ""]]
+    - !Not [!Equals [!Ref CertificateArn, ""]]
+
+Globals:
+  Function:
+    Architectures: [x86_64]
+    Environment:
+      Variables:
+        PRESERVICA_SERVER: !Ref PreservicaServer
+        PRESERVICA_TENANT: !Ref PreservicaTenant
+        PRESERVICA_SECRET_ARN: !Ref PreservicaSecretArn
+        PUBLIC_SECURITY_TAGS: !Ref PublicSecurityTags
+        ROOT_FOLDERS: !Ref RootFolders
+        LANDING_URL_TEMPLATE: !Ref LandingUrlTemplate
+        PUBLIC_BASE_URL: !If
+          - HasDomain
+          - !Sub "https://${DomainName}"
+          - !Sub "https://${Distribution.DomainName}"
+        TILES_BUCKET: !Ref TilesBucket
+        PUBLIC_BUCKET: !Ref PublicBucket
+        DISTRIBUTION_ID: !Ref Distribution
+        QUEUE_URL: !Ref ConvertQueue
+
+Resources:
+  # ---------------------------------------------------------------- storage
+  TilesBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+
+  PublicBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+
+  PublicBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PublicBucket
+      PolicyDocument:
+        Statement:
+          - Sid: CloudFrontReadsManifestsOnly
+            Effect: Allow
+            Principal: {Service: cloudfront.amazonaws.com}
+            Action: s3:GetObject
+            Resource: !Sub "${PublicBucket.Arn}/manifests/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+
+  # ---------------------------------------------------------------- queue
+  ConvertDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600
+
+  ConvertQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 5400
+      MessageRetentionPeriod: 345600
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ConvertDeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  # ---------------------------------------------------------------- functions (one container image)
+  WebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Description: Checks Preservica's signature and queues the entities a webhook names
+      ImageConfig: {Command: ["preservica_iiif.handlers.webhook"]}
+      MemorySize: 512
+      Timeout: 15
+      Environment:
+        Variables:
+          WEBHOOK_SECRET_ARN: !Ref WebhookSecretArn
+      Policies:
+        - SQSSendMessagePolicy: {QueueName: !GetAtt ConvertQueue.QueueName}
+        - AWSSecretsManagerGetSecretValuePolicy: {SecretArn: !Ref WebhookSecretArn}
+      Events:
+        Preservica:
+          Type: HttpApi
+          Properties:
+            Path: /preservica
+            Method: POST
+    Metadata:
+      Dockerfile: iiif/Dockerfile
+      DockerContext: ..
+      DockerTag: python3.12-v1
+
+  ConvertFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Description: Converts one public asset to tiled TIFFs and writes its IIIF manifest
+      ImageConfig: {Command: ["preservica_iiif.handlers.convert"]}
+      MemorySize: 4096
+      Timeout: 900
+      EphemeralStorage: {Size: 10240}
+      Policies:
+        - S3CrudPolicy: {BucketName: !Ref TilesBucket}
+        - S3CrudPolicy: {BucketName: !Ref PublicBucket}
+        - SQSSendMessagePolicy: {QueueName: !GetAtt ConvertQueue.QueueName}
+        - AWSSecretsManagerGetSecretValuePolicy: {SecretArn: !Ref PreservicaSecretArn}
+        - Statement:
+            - Effect: Allow
+              Action: cloudfront:CreateInvalidation
+              Resource: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+      Events:
+        Queue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ConvertQueue.Arn
+            BatchSize: 1
+            FunctionResponseTypes: [ReportBatchItemFailures]
+            ScalingConfig: {MaximumConcurrency: !Ref ConverterConcurrency}
+    Metadata:
+      Dockerfile: iiif/Dockerfile
+      DockerContext: ..
+      DockerTag: python3.12-v1
+
+  ReconcileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Description: Nightly check - queues missing assets, withdraws ones no longer public, writes the index
+      ImageConfig: {Command: ["preservica_iiif.handlers.reconcile"]}
+      MemorySize: 1024
+      Timeout: 900
+      Policies:
+        - S3CrudPolicy: {BucketName: !Ref TilesBucket}
+        - S3CrudPolicy: {BucketName: !Ref PublicBucket}
+        - SQSSendMessagePolicy: {QueueName: !GetAtt ConvertQueue.QueueName}
+        - AWSSecretsManagerGetSecretValuePolicy: {SecretArn: !Ref PreservicaSecretArn}
+        - Statement:
+            - Effect: Allow
+              Action: cloudfront:CreateInvalidation
+              Resource: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+      Events:
+        Nightly:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: !Ref ReconcileSchedule
+    Metadata:
+      Dockerfile: iiif/Dockerfile
+      DockerContext: ..
+      DockerTag: python3.12-v1
+
+  # ---------------------------------------------------------------- CloudFront: /manifests/* and /iiif/*
+  ManifestsOriginAccess:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-manifests"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: Rod Library Digital Collections IIIF
+        HttpVersion: http2and3
+        PriceClass: PriceClass_100
+        Aliases: !If [HasDomain, [!Ref DomainName], !Ref AWS::NoValue]
+        ViewerCertificate: !If
+          - HasDomain
+          - AcmCertificateArn: !Ref CertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
+        Origins:
+          - Id: manifests
+            DomainName: !GetAtt PublicBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt ManifestsOriginAccess.Id
+            S3OriginConfig: {OriginAccessIdentity: ""}
+          - !If
+            - HasImageOrigin
+            - Id: images
+              DomainName: !Ref ImageOriginDomain
+              CustomOriginConfig:
+                OriginProtocolPolicy: https-only
+                OriginSSLProtocols: [TLSv1.2]
+            - !Ref AWS::NoValue
+        DefaultCacheBehavior:
+          TargetOriginId: manifests
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6          # Managed-CachingOptimized
+          ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c # Managed-SimpleCORS
+        CacheBehaviors: !If
+          - HasImageOrigin
+          - - PathPattern: /iiif/*
+              TargetOriginId: images
+              ViewerProtocolPolicy: redirect-to-https
+              AllowedMethods: [GET, HEAD, OPTIONS]
+              Compress: true
+              CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+              ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
+          - !Ref AWS::NoValue
+
+Outputs:
+  TilesBucketName:
+    Description: Give this to serverless-iiif as its SourceBucket
+    Value: !Ref TilesBucket
+  PublicBucketName:
+    Value: !Ref PublicBucket
+  WebhookUrl:
+    Description: Subscribe this URL in Preservica (python -m preservica_iiif subscribe URL --trigger ...)
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/preservica"
+  PublicBaseUrl:
+    Value: !If [HasDomain, !Sub "https://${DomainName}", !Sub "https://${Distribution.DomainName}"]
+  ManifestUrlTemplate:
+    Description: The catalog's iiif_manifest_url_template
+    Value: !If
+      - HasDomain
+      - !Sub "https://${DomainName}/manifests/{uuid}.json"
+      - !Sub "https://${Distribution.DomainName}/manifests/{uuid}.json"
+  ManifestIndexUrl:
+    Description: The catalog's iiif_manifest_index_url
+    Value: !If
+      - HasDomain
+      - !Sub "https://${DomainName}/manifests/index.json"
+      - !Sub "https://${Distribution.DomainName}/manifests/index.json"
+  DistributionId:
+    Value: !Ref Distribution
+  DeadLetterQueueUrl:
+    Description: Assets that failed three times land here
+    Value: !Ref ConvertDeadLetterQueue

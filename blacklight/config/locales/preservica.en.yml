@@ -44,6 +44,7 @@ en:
     # Item and collection pages: the hand-off to Preservica's public portal (landing_url_template).
     handoff:
       new_tab: '(opens in a new tab)'
+      viewer_link: 'Download or view in Preservica'
       note: 'Opens in a new tab. Close the tab or use Back to return here.'
       item:
         heading: 'View this item in Preservica'

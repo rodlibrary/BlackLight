@@ -1,0 +1,47 @@
+name: IIIF pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: [ "iiif/**", "ingest/**", ".github/workflows/iiif.yml" ]
+  pull_request:
+    branches: [ "main" ]
+    paths: [ "iiif/**", "ingest/**", ".github/workflows/iiif.yml" ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install dependencies
+      run: pip install -r iiif/requirements-dev.txt
+    - name: Unit tests (prebuilt libvips)
+      working-directory: iiif
+      run: pytest -q
+    - name: Lint the CloudFormation template
+      run: cfn-lint iiif/template.yaml
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Lambda image
+      run: docker build -f iiif/Dockerfile -t preservica-iiif .
+    - name: Convert a JPEG 2000 inside the image (Debian libvips with openjpeg)
+      run: |
+        docker run --rm --entrypoint python preservica-iiif -c "
+        import pyvips
+        from preservica_iiif import imaging, handlers
+        (pyvips.Image.black(1200, 900, bands=3) + 80).cast('uchar').write_to_file('/tmp/a.jp2')
+        assert imaging.can_convert('.jp2')
+        assert imaging.to_pyramid_tiff('/tmp/a.jp2', '/tmp/a.tif') == (1200, 900)
+        out = pyvips.Image.new_from_file('/tmp/a.tif')
+        assert out.get('n-pages') > 1, 'not a pyramid'
+        print('ok', pyvips.version(0), pyvips.version(1))
+        "

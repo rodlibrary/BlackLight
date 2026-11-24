@@ -18,7 +18,13 @@
     <div class="ratio ratio-4x3 mb-2">
       <iframe src="<%= iiif_viewer_src %>" title="Viewer: <%= title %>" allowfullscreen loading="lazy"></iframe>
     </div>
-    <p class="small"><%= link_to 'IIIF manifest', iiif_manifest, target: '_blank', rel: 'noopener noreferrer' %></p>
+    <p class="small">
+      <% if landing_url.present? %>
+        <%= link_to safe_join([t('preservica.handoff.viewer_link'), ' ', tag.span(t('preservica.handoff.new_tab'), class: 'visually-hidden')]),
+                    landing_url, target: '_blank', rel: 'noopener noreferrer' %> ·
+      <% end %>
+      <%= link_to 'IIIF manifest', iiif_manifest, target: '_blank', rel: 'noopener noreferrer' %>
+    </p>
   <% elsif iiif_manifest.present? %>
     <p>
       <%= link_to 'IIIF manifest', iiif_manifest, class: 'btn btn-outline-primary', target: '_blank', rel: 'noopener noreferrer' %>

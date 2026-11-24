@@ -26,6 +26,7 @@ DEFAULTS = {
     "media_url_template": "",
     "thumbnail_url_template": "",
     "iiif_manifest_url_template": "",
+    "iiif_manifest_index_url": "",
     "georeference_url_template": "",
     "local_metadata": [],
     "max_delete_fraction": 0.2,
