@@ -2,6 +2,8 @@
 en:
   blacklight:
     application_name: 'Digital Collections'
+    advanced_search:
+      more_options: 'Advanced search'
   preservica:
     home:
       heading: 'Explore Digital Collections'

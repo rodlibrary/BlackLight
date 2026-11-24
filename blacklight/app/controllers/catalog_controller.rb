@@ -72,25 +72,28 @@ class CatalogController < ApplicationController
     config.add_facet_field 'department_ssim', label: 'Department', limit: 10
     config.add_facet_field 'collection_ssim', label: 'Collection', limit: 10
     config.add_facet_field 'resource_type_ssim', label: 'Type', limit: 10
-    config.add_facet_field 'creator_ssim', label: 'Creator', limit: 10
-    config.add_facet_field 'subject_ssim', label: 'Subject', limit: 10, index_range: 'A'..'Z'
-    config.add_facet_field 'place_ssim', label: 'Place', limit: 10
+    config.add_facet_field 'creator_ssim', label: 'Creator', limit: 10, include_in_advanced_search: false
+    config.add_facet_field 'subject_ssim', label: 'Subject', limit: 10, index_range: 'A'..'Z', include_in_advanced_search: false
+    config.add_facet_field 'place_ssim', label: 'Place', limit: 10, include_in_advanced_search: false
     config.add_facet_field 'genre_ssim', label: 'Genre', limit: 10
     # Plain year facet; blacklight_range_limit can replace it with a slider on the same field.
-    config.add_facet_field 'year_isim', label: 'Year', limit: 15, sort: 'index'
+    config.add_facet_field 'year_isim', label: 'Year', limit: 15, sort: 'index', include_in_advanced_search: false
     config.add_facet_field 'language_ssim', label: 'Language', limit: 10
     # Not shown in the sidebar: used by breadcrumb, "browse this collection" and
     # "search within" links. The helper turns folder ids into titles in the
     # "You searched for" constraints.
-    config.add_facet_field 'ancestor_ids_ssim', label: 'Within', show: false, helper_method: :folder_title
-    config.add_facet_field 'parent_id_ssi', label: 'Directly in', show: false, helper_method: :folder_title
+    config.add_facet_field 'ancestor_ids_ssim', label: 'Within', show: false, include_in_advanced_search: false, helper_method: :folder_title
+    config.add_facet_field 'parent_id_ssi', label: 'Directly in', show: false, include_in_advanced_search: false, helper_method: :folder_title
     config.add_facet_field 'level', label: 'Collections', show: false, query: {
       top: { label: 'Top-level collections', fq: 'entity_type_ssi:folder AND depth_isi:0' }
     }
     config.add_facet_fields_to_solr_request!
 
     # --- Search fields --------------------------------------------------------
-    config.add_search_field 'all_fields', label: 'All fields'
+    config.add_search_field('all_fields') do |field|
+      field.label = 'All fields'
+      field.solr_parameters = { qf: ALL_FIELDS_QF, pf: ALL_FIELDS_PF }
+    end
 
     config.add_search_field('title') do |field|
       field.label = 'Title'
@@ -130,6 +133,14 @@ class CatalogController < ApplicationController
     # config.add_show_tools_partial(:email, callback: :email_action, validator: :email_params_valid?)
 
     config.add_nav_action(:about, partial: 'shared/about_nav')
+
+    # --- Advanced search (/advanced, linked beside the search bar) -----------
+    # Every search field becomes a box on the form; facets become checkbox
+    # lists, except the hidden ones and very long lists (creator, subject,
+    # place, year) marked include_in_advanced_search: false above.
+    config.advanced_search.enabled = true
+    config.copy_search_field_config_to_advanced!
+    config.copy_facet_field_config_to_advanced!
 
     config.spell_max = 5
     config.autocomplete_enabled = true

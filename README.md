@@ -26,7 +26,7 @@ sanitized HTML).
   Preservica Universal Access with an "Open in Preservica" button (the
   library's chosen access model), or show an image, audio, video, PDF or IIIF
   preview instead if access copies or manifests are published elsewhere
-- Citations and autocomplete from Blacklight. There are no logins, bookmarks or search history: the site has no user accounts.
+- Advanced search (/advanced), linked beside the search bar: one box per search field, plus checkbox limits. Citations and autocomplete from Blacklight. There are no logins, bookmarks or search history: the site has no user accounts.
 
 ## Repository layout
 

@@ -1,6 +1,6 @@
 # Interface prototype
 
-Screenshots of the Rod Library Digital Collections interface prototype. The header has one link, About; the site has no logins or bookmarks. They're
+Screenshots of the Rod Library Digital Collections interface prototype. The header has the search bar, an Advanced search link and About; the site has no logins or bookmarks. They're
 taken from the clickable design canvas, where reviewers can try the facets,
 sorting, list/gallery view and the collection tree:
 [Digital Collections prototype](https://claude.ai/artifact/Nt4kCfCB8Nqw7WZHaUvpCQ)
@@ -19,6 +19,7 @@ rendered without web fonts, so they use the system fallbacks.
 | [04-item-photograph-handoff.png](04-item-photograph-handoff.png) | An item page for a photograph, with the hand-off to Preservica: thumbnail and an "Open in Preservica" button to the item in Universal Access |
 | [05-item-thesis-handoff.png](05-item-thesis-handoff.png) | The same page for an Institutional Repository thesis, showing the Department field from DCDS_local |
 | [06-about.png](06-about.png) | The About page, linked from the header: the library's text from the Universal Access About page, the two areas, how viewing works, a placeholder for the use policy, a link to the LibGuide, and the contact email |
+| [07-advanced-search.png](07-advanced-search.png) | Advanced search, linked beside every search bar: one box per search field (all/any), checkbox limits for Area, Type of Resource, Department and Genre, a date range, and sorting |
 
 ## Access model: hand-off to Preservica
 
