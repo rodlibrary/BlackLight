@@ -39,6 +39,8 @@ def validate(config: list) -> list[dict]:
         if not isinstance(entry, dict) or not entry.get("schema") or not isinstance(entry.get("fields"), dict):
             raise ValueError(f"local_metadata[{i}] needs a schema and a fields map")
         for element, field in entry["fields"].items():
+            if str(field) == "coordinates":
+                continue
             if not SOLR_FIELD.match(str(field)):
                 raise ValueError(f"local_metadata[{i}]: {field!r} must be a multi-valued Solr field "
                                  "ending _ssim, _tesim or _ssm")

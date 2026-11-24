@@ -79,6 +79,9 @@ class CatalogController < ApplicationController
     # Plain year facet; blacklight_range_limit can replace it with a slider on the same field.
     config.add_facet_field 'year_isim', label: 'Year', limit: 15, sort: 'index', include_in_advanced_search: false
     config.add_facet_field 'language_ssim', label: 'Language', limit: 10
+    config.add_facet_field 'geo', label: 'Location', include_in_advanced_search: false, query: {
+      mapped: { label: 'On the map', fq: 'has_coordinates_bsi:true' }
+    }
     # Not shown in the sidebar: used by breadcrumb, "browse this collection" and
     # "search within" links. The helper turns folder ids into titles in the
     # "You searched for" constraints.
@@ -88,6 +91,9 @@ class CatalogController < ApplicationController
       top: { label: 'Top-level collections', fq: 'entity_type_ssi:folder AND depth_isi:0' }
     }
     config.add_facet_fields_to_solr_request!
+
+    # "Search this area" on the Map page sends bbox=west,south,east,north (SearchBuilder#add_map_area).
+    config.search_state_fields = config.search_state_fields + [:bbox]
 
     # --- Search fields --------------------------------------------------------
     config.add_search_field('all_fields') do |field|
@@ -127,6 +133,7 @@ class CatalogController < ApplicationController
     config.add_results_collection_tool(:sort_widget)
     config.add_results_collection_tool(:per_page_widget)
     config.add_results_collection_tool(:view_type_group)
+    config.add_results_collection_tool(:map_view, component: MapLinkComponent)
 
     config.add_show_tools_partial(:citation)
     # Email and SMS need a configured mailer/SMS gateway; enable them once one exists:

@@ -9,6 +9,12 @@ class PreservicaDocumentComponent < Blacklight::DocumentComponent
         render BreadcrumbComponent.new(document: @document)
       end
     end
+    item_map = ItemMapComponent.new(document: @document)
+    if item_map.render?
+      with_metadata_section do
+        render item_map
+      end
+    end
     if @document['entity_type_ssi'] == 'folder'
       with_metadata_section do
         render CollectionContentsComponent.new(document: @document)

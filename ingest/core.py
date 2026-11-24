@@ -115,6 +115,8 @@ class Record:
     thumbnail_file: str | None = None  # cached thumbnail file name, served by the Rails app
     captions_url: str | None = None    # WebVTT for audio/video
     iiif_manifest_url: str | None = None
+    georeference_url: str | None = None   # IIIF Georeference Annotation (e.g. Allmaps) for a scanned map
+    coordinates: list[tuple[float, float]] = field(default_factory=list)   # (latitude, longitude) points
     file_formats: list[str] = field(default_factory=list)
     metadata_format: str | None = None  # mods | oai_dc | entity
     extra: dict = field(default_factory=dict)   # additional Solr fields, already suffixed
@@ -135,6 +137,10 @@ class Record:
             raise RecordError(f"{self.id}: unknown media_type {self.media_type!r}")
         if len(self.ancestor_ids) != len(self.ancestor_titles):
             raise RecordError(f"{self.id}: ancestor_ids and ancestor_titles differ in length")
+        bad_points = [p for p in self.coordinates
+                      if len(p) != 2 or not (-90 <= p[0] <= 90 and -180 <= p[1] <= 180)]
+        if bad_points:
+            raise RecordError(f"{self.id}: coordinates out of range: {bad_points}")
         if self.thumbnail_file and not THUMBNAIL_FILE_RE.match(self.thumbnail_file):
             raise RecordError(f"{self.id}: unexpected thumbnail file name {self.thumbnail_file!r}")
         bad = [k for k in self.extra if not re.search(r"_(tesim|ssim|ssm|ssi|isim|isi|dtsi|teim|bsi)$", k)]
@@ -204,6 +210,11 @@ class Record:
             "has_thumbnail_bsi": bool(safe_url(self.thumbnail_url) or self.thumbnail_file),
             "captions_url_ssi": safe_url(self.captions_url),
             "iiif_manifest_ssi": safe_url(self.iiif_manifest_url),
+            "georeference_url_ssi": safe_url(self.georeference_url),
+            # "lat,lon" points: coordinates_srpt is the spatial index (map search), _ssm the stored copy.
+            "coordinates_srpt": [f"{lat},{lon}" for lat, lon in self.coordinates],
+            "coordinates_ssm": [f"{lat},{lon}" for lat, lon in self.coordinates],
+            "has_coordinates_bsi": bool(self.coordinates),
             "file_format_ssim": _list(self.file_formats),
             "metadata_format_ssi": self.metadata_format,
             "ingest_run_ssi": run_id,

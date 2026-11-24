@@ -32,7 +32,8 @@
     "url_ssi": "https://ua.example.edu/SO_f0000000-0000-4000-8000-000000000001/",
     "has_thumbnail_bsi": false,
     "metadata_format_ssi": "entity",
-    "ingest_run_ssi": "demo"
+    "ingest_run_ssi": "demo",
+    "has_coordinates_bsi": false
   },
   {
     "id": "preservica-f0000000-0000-4000-8000-000000000004",
@@ -64,7 +65,8 @@
     "url_ssi": "https://ua.example.edu/SO_f0000000-0000-4000-8000-000000000004/",
     "has_thumbnail_bsi": false,
     "metadata_format_ssi": "entity",
-    "ingest_run_ssi": "demo"
+    "ingest_run_ssi": "demo",
+    "has_coordinates_bsi": false
   },
   {
     "id": "preservica-a0000000-0000-4000-8000-000000000003",
@@ -115,7 +117,8 @@
     "url_ssi": "https://ua.example.edu/IO_a0000000-0000-4000-8000-000000000003/",
     "has_thumbnail_bsi": false,
     "metadata_format_ssi": "oai_dc",
-    "ingest_run_ssi": "demo"
+    "ingest_run_ssi": "demo",
+    "has_coordinates_bsi": false
   },
   {
     "id": "preservica-f0000000-0000-4000-8000-000000000002",
@@ -154,7 +157,8 @@
     "url_ssi": "https://ua.example.edu/SO_f0000000-0000-4000-8000-000000000002/",
     "has_thumbnail_bsi": false,
     "metadata_format_ssi": "entity",
-    "ingest_run_ssi": "demo"
+    "ingest_run_ssi": "demo",
+    "has_coordinates_bsi": false
   },
   {
     "id": "preservica-a0000000-0000-4000-8000-000000000002",
@@ -232,7 +236,14 @@
       "image/jpeg"
     ],
     "metadata_format_ssi": "oai_dc",
-    "ingest_run_ssi": "demo"
+    "ingest_run_ssi": "demo",
+    "coordinates_srpt": [
+      "42.5355,-92.4453"
+    ],
+    "coordinates_ssm": [
+      "42.5355,-92.4453"
+    ],
+    "has_coordinates_bsi": true
   },
   {
     "id": "preservica-f0000000-0000-4000-8000-000000000003",
@@ -273,7 +284,8 @@
     "url_ssi": "https://ua.example.edu/SO_f0000000-0000-4000-8000-000000000003/",
     "has_thumbnail_bsi": false,
     "metadata_format_ssi": "entity",
-    "ingest_run_ssi": "demo"
+    "ingest_run_ssi": "demo",
+    "has_coordinates_bsi": false
   },
   {
     "id": "preservica-a0000000-0000-4000-8000-000000000001",
@@ -355,6 +367,13 @@
     "ingest_run_ssi": "demo",
     "alternative_title_tesim": [
       "Okafor interview"
-    ]
+    ],
+    "coordinates_srpt": [
+      "42.4928,-92.3426"
+    ],
+    "coordinates_ssm": [
+      "42.4928,-92.3426"
+    ],
+    "has_coordinates_bsi": true
   }
 ]

@@ -1,0 +1,91 @@
+<% content_for(:page_title) { t('preservica.map.title') } %>
+<%= render 'shared/map_assets' %>
+
+<div class="py-3">
+  <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-2">
+    <h1 class="h2 mb-0"><%= t('preservica.map.title') %></h1>
+    <%= link_to t('preservica.map.show_list'), search_catalog_path(search_state.params_for_search.except(:bbox, :controller, :action)) %>
+  </div>
+
+  <p class="mb-2" aria-live="polite">
+    <% total = @response.total %>
+    <%= t('preservica.map.count', count: total, shown: @points.size) %>
+    <% if total > MapController::MAX_POINTS %>
+      <%= t('preservica.map.too_many', max: number_with_delimiter(MapController::MAX_POINTS)) %>
+    <% end %>
+    <% if @bbox %>
+      · <%= t('preservica.map.in_area') %>
+      <%= link_to t('preservica.map.clear_area'), map_path(search_state.params_for_search.except(:bbox, :controller, :action)) %>
+    <% end %>
+  </p>
+
+  <div id="dc-map" class="border rounded" style="height: 600px;"
+       role="region" aria-label="<%= t('preservica.map.title') %>"
+       data-tile-url="<%= ENV.fetch('MAP_TILE_URL', 'https://tile.openstreetmap.org/{z}/{x}/{y}.png') %>"
+       data-attribution="<%= ENV.fetch('MAP_TILE_ATTRIBUTION', '&copy; OpenStreetMap contributors') %>"
+       data-search-url="<%= map_path(search_state.params_for_search.except(:bbox, :controller, :action)) %>"
+       data-bbox="<%= @bbox&.join(',') %>"
+       data-search-label="<%= t('preservica.map.search_area') %>"></div>
+
+  <%# Pins as JSON. The map is a visual aid: every record here is also in the list view. %>
+  <script type="application/json" id="dc-map-points"><%= raw json_escape(@points.to_json) %></script>
+</div>
+
+<script type="module">
+  import L from 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/+esm';
+
+  const el = document.getElementById('dc-map');
+  const points = JSON.parse(document.getElementById('dc-map-points').textContent);
+  const map = L.map(el, { scrollWheelZoom: false });
+  L.tileLayer(el.dataset.tileUrl, { attribution: el.dataset.attribution, maxZoom: 19 }).addTo(map);
+
+  // Popups are built from DOM nodes, never HTML strings: titles come from catalog metadata.
+  function popup(p) {
+    const box = document.createElement('div');
+    if (p.thumb) {
+      const img = document.createElement('img');
+      img.src = p.thumb; img.alt = ''; img.style.maxWidth = '160px'; img.style.display = 'block'; img.className = 'mb-1';
+      box.appendChild(img);
+    }
+    const a = document.createElement('a');
+    a.href = p.url; a.textContent = p.title || 'Untitled';
+    box.appendChild(a);
+    if (p.date) { const d = document.createElement('div'); d.className = 'small text-body-secondary'; d.textContent = p.date; box.appendChild(d); }
+    return box;
+  }
+
+  const markers = points.map((p) => L.circleMarker([p.lat, p.lon], {
+    radius: 8, color: '#2E1A47', weight: 2, fillColor: '#FFB500', fillOpacity: 0.9
+  }).bindPopup(() => popup(p)));
+  const group = L.featureGroup(markers).addTo(map);
+
+  if (el.dataset.bbox) {
+    const [w, s, e, n] = el.dataset.bbox.split(',').map(Number);
+    map.fitBounds([[s, w], [n, e]]);
+  } else if (markers.length) {
+    map.fitBounds(group.getBounds().pad(0.2), { maxZoom: 14 });
+  } else {
+    map.setView([42.5139, -92.4632], 6);   // Cedar Falls, Iowa
+  }
+
+  // "Search this area": reload the page limited to the visible map.
+  const SearchArea = L.Control.extend({
+    onAdd() {
+      const btn = L.DomUtil.create('button', 'btn btn-primary btn-sm');
+      btn.type = 'button';
+      btn.textContent = el.dataset.searchLabel;
+      L.DomEvent.disableClickPropagation(btn);
+      btn.addEventListener('click', () => {
+        const b = map.getBounds();
+        const r = (v) => Math.round(v * 1e5) / 1e5;
+        const clamp = (v, m) => Math.max(-m, Math.min(m, v));
+        const box = [clamp(r(b.getWest()), 180), clamp(r(b.getSouth()), 90), clamp(r(b.getEast()), 180), clamp(r(b.getNorth()), 90)];
+        const url = new URL(el.dataset.searchUrl, window.location.origin);
+        url.searchParams.set('bbox', box.join(','));
+        window.location.assign(url.toString());
+      });
+      return btn;
+    }
+  });
+  new SearchArea({ position: 'topright' }).addTo(map);
+</script>

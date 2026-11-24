@@ -1,0 +1,57 @@
+<%= helpers.render 'shared/map_assets' %>
+<section class="item-map my-4" aria-labelledby="<%= map_id %>-heading">
+  <h2 id="<%= map_id %>-heading" class="h5"><%= georeference_url ? t('preservica.map.georef_heading') : t('preservica.map.item_heading') %></h2>
+  <div id="<%= map_id %>" class="border rounded" style="height: 360px;" role="region"
+       aria-label="<%= georeference_url ? t('preservica.map.georef_heading') : t('preservica.map.item_heading') %>"
+       data-points="<%= points.to_json %>" data-georef="<%= georeference_url %>"
+       data-tile-url="<%= tile_url %>" data-attribution="<%= tile_attribution %>"></div>
+  <% if georeference_url %>
+    <div class="d-flex flex-wrap align-items-center gap-3 mt-2 small">
+      <label class="d-flex align-items-center gap-2" for="<%= map_id %>-opacity">
+        <%= t('preservica.map.opacity') %>
+        <input type="range" id="<%= map_id %>-opacity" min="0" max="100" value="100" style="width: 140px;">
+      </label>
+      <%= link_to t('preservica.map.allmaps_viewer'), allmaps_viewer_url, target: '_blank', rel: 'noopener noreferrer' %>
+      <span id="<%= map_id %>-note" class="text-body-secondary" hidden><%= t('preservica.map.georef_failed') %></span>
+    </div>
+  <% end %>
+</section>
+
+<script type="module">
+  import L from 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/+esm';
+
+  const el = document.getElementById('<%= j map_id %>');
+  const points = JSON.parse(el.dataset.points || '[]');
+  // zoomAnimationThreshold: 1 is what the Allmaps plugin needs.
+  const map = L.map(el, { scrollWheelZoom: false, zoomAnimationThreshold: 1 });
+  L.tileLayer(el.dataset.tileUrl, { attribution: el.dataset.attribution, maxZoom: 19 }).addTo(map);
+
+  const pins = points.map(([lat, lon]) => L.circleMarker([lat, lon], {
+    radius: 8, color: '#2E1A47', weight: 2, fillColor: '#FFB500', fillOpacity: 0.9
+  }).addTo(map));
+  if (pins.length) {
+    map.fitBounds(L.featureGroup(pins).getBounds().pad(0.5), { maxZoom: 13 });
+  } else {
+    map.setView([42.5139, -92.4632], 10);
+  }
+
+  if (el.dataset.georef) {
+    const note = document.getElementById('<%= j map_id %>-note');
+    try {
+      const { WarpedMapLayer } = await import('https://cdn.jsdelivr.net/npm/@allmaps/leaflet@1.0.0-beta.55/+esm');
+      const layer = new WarpedMapLayer().addTo(map);
+      await layer.addGeoreferenceAnnotationByUrl(el.dataset.georef);
+      const bounds = typeof layer.getBounds === 'function' ? layer.getBounds() : null;
+      if (bounds) map.fitBounds(bounds);
+      const slider = document.getElementById('<%= j map_id %>-opacity');
+      if (slider && typeof layer.setOpacity === 'function') {
+        slider.addEventListener('input', () => layer.setOpacity(Number(slider.value) / 100));
+      } else if (slider) {
+        slider.closest('label').hidden = true;
+      }
+    } catch (error) {
+      if (note) note.hidden = false;
+      console.warn('Georeferenced map could not be loaded', error);
+    }
+  }
+</script>

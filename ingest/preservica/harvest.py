@@ -16,6 +16,9 @@ import xml.etree.ElementTree as ET
 from typing import Iterator
 
 from ..core import Deletion, Record, record_id
+from urllib.parse import quote
+
+from ..geo import parse_points
 from .client import PreservicaClient
 from .hierarchy import EntityInfo, Hierarchy
 from .local_metadata import local_fields, validate as validate_local
@@ -42,6 +45,7 @@ def security_tags(record: ET.Element) -> list[str]:
 
 
 def _fill(template: str | None, **values) -> str | None:
+    """Fill {uuid} and, for georeference_url_template, {manifest} (the IIIF manifest URL, URL-encoded)."""
     if not template:
         return None
     try:
@@ -200,6 +204,14 @@ class Harvester:
         thumb_url = _fill(self.s.get("thumbnail_url_template"), **values)
         ids = f["identifiers"]
         aspace = ids.get("aspace") or ids.get("archivesspace") or []
+        local = dict(local or {})
+        coordinates = list(f.get("coordinates", []))
+        for point in parse_points(local.pop("coordinates", [])):
+            if point not in coordinates:
+                coordinates.append(point)
+        manifest = None if is_folder else _fill(self.s.get("iiif_manifest_url_template"), **values)
+        georef = (_fill(self.s.get("georeference_url_template"), uuid=ref, manifest=quote(manifest, safe=""))
+                  if manifest else None)
 
         return Record(
             id=record_id(self.source, ref),
@@ -236,7 +248,9 @@ class Harvester:
             media_type=media_type if media else None,
             thumbnail_url=thumb_url or (media if media and media_type == "image" else None),
             thumbnail_file=None if thumb_url else self._thumbnail(kind, ref, changed),
-            iiif_manifest_url=None if is_folder else _fill(self.s.get("iiif_manifest_url_template"), **values),
+            iiif_manifest_url=manifest,
+            georeference_url=georef,
+            coordinates=coordinates,
             file_formats=f["file_formats"],
             metadata_format=f["metadata_format"],
             extra={k: v for k, v in {
@@ -244,7 +258,7 @@ class Harvester:
                 "extent_ssm": f["extent"],
                 "digital_origin_ssi": f["digital_origin"],
                 "relation_ssm": f["relations"],
-                **(local or {}),
+                **local,
             }.items() if v},
         )
 
@@ -260,6 +274,7 @@ class Harvester:
             "collection": None, "collection_id": None, "rights_uri": None, "rights_note": [],
             "identifiers": {}, "physical_location": None, "shelf_locator": None, "file_formats": [],
             "metadata_format": "entity", "alt_titles": [], "extent": [], "digital_origin": None, "relations": [],
+            "coordinates": [],
         }
         # Not reported as changed by OAI-PMH: keep its cached thumbnail.
         return self.build("so", ref, info.title or "Untitled folder", f, chain, changed=False)

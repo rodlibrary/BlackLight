@@ -9,6 +9,7 @@ import re
 import xml.etree.ElementTree as ET
 
 from ..core import infer_media_type
+from ..geo import parse_point, parse_points
 from .oai import NS
 
 # Words in an access condition that mean the item must not be public.
@@ -140,6 +141,7 @@ def mods_fields(mods: ET.Element) -> dict:
         "physical_location": _text(mods.find("mods:location/mods:physicalLocation", NS)),
         "shelf_locator": shelf[0] if shelf else None,
         "relations": [],
+        "coordinates": parse_points(_all(mods, "mods:subject/mods:cartographics/mods:coordinates")),
         "metadata_format": "mods",
     }
 
@@ -197,7 +199,7 @@ def dc_fields(dc: ET.Element, split_on: str | None = ";") -> dict:
         "abstract": descriptions[0] if descriptions else None,
         "notes": descriptions[1:],
         "subjects": _split(_all(dc, "dc:subject"), split_on),
-        "places": _split(_all(dc, "dc:coverage"), split_on),
+        "places": _split([c for c in _all(dc, "dc:coverage") if not parse_point(c)], split_on),
         "rights_uri": rights_uri,
         "rights_note": [r for r in rights if r != rights_uri],
         "restricted": False,  # dc:rights is a use statement, not an access condition
@@ -207,6 +209,8 @@ def dc_fields(dc: ET.Element, split_on: str | None = ";") -> dict:
         "physical_location": None,
         "shelf_locator": None,
         "relations": _all(dc, "dc:relation") + _all(dc, "dc:source"),
+        # Coverage is split on dc_split, but a "lat; lon" pair must stay whole, so parse the raw values.
+        "coordinates": parse_points(_all(dc, "dc:coverage")),
         "metadata_format": "oai_dc",
     }
 
