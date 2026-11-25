@@ -75,6 +75,7 @@ def test_harvest_dc_coordinates_and_georeference_template():
           '<dc:coverage>42.5277, -92.4453</dc:coverage></oai_dc:dc>')
     pages = {"oai_dc": [oai_page([oai_record(f"oai:io:{A2}", dc)])]}
     records, _, _ = run({"metadata_prefix": "oai_dc",
+                         "iiif_enabled": True,
                          "iiif_manifest_url_template": "https://iiif.example.edu/{uuid}/manifest",
                          "georeference_url_template": "https://annotations.example.org/?url={manifest}"},
                         FakePreservica(pages, tree()))

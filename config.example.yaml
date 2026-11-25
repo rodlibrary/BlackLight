@@ -74,7 +74,12 @@ preservica:
   folder_landing_url_template: ""
   thumbnail_url_template: ""                  # public thumbnail URL; overrides the cached thumbnails
   media_url_template: ""                      # public access copy (e.g. S3/CloudFront) to preview or play
-  # IIIF manifests from the pipeline in iiif/ (see iiif/README.md), e.g.
+  # --- IIIF (optional, off until the AWS pipeline in iiif/ is running) -------
+  # While false, items keep the "Open in Preservica" hand-off and the settings below are ignored.
+  # To turn on: deploy iiif/ (see iiif/README.md), fill in the two URLs, set this to true, run a
+  # full harvest, and set IIIF_ENABLED=true (and IIIF_VIEWER_URL) for the Blacklight app.
+  iiif_enabled: false
+  # IIIF manifests from the pipeline in iiif/, e.g.
   #   iiif_manifest_url_template: "https://iiif.lib.uni.edu/manifests/{uuid}.json"
   #   iiif_manifest_index_url: "https://iiif.lib.uni.edu/manifests/index.json"
   # The index lists the items that have a manifest, so only those get a viewer; the rest keep

@@ -21,7 +21,7 @@ rendered without web fonts, so they use the system fallbacks.
 | [06-about.png](06-about.png) | The About page, linked from the header: the library's text from the Universal Access About page, the two areas, how viewing works, a placeholder for the use policy, a link to the LibGuide, and the contact email |
 | [07-advanced-search.png](07-advanced-search.png) | Advanced search, linked beside every search bar: one box per search field (all/any), checkbox limits for Unit, Type of Resource, Department and Genre, a date range, and sorting |
 | [08-map.png](08-map.png) | The Map page: records in the current search that have coordinates, as pins with a thumbnail pop-up, "Search this area", and "Show as a list" |
-| [09-item-scanned-map-overlay.png](09-item-scanned-map-overlay.png) | A georeferenced scanned map: the item page overlays it on today's streets with Allmaps, with a transparency slider and a link to the Allmaps Viewer. Photographs with coordinates get a small Location map instead |
+| [09-item-scanned-map-overlay.png](09-item-scanned-map-overlay.png) | A georeferenced scanned map: the item page overlays it on today's streets with Allmaps, with a transparency slider and a link to the Allmaps Viewer. This needs IIIF, an optional later phase. Photographs with coordinates get a small Location map instead |
 
 ## Access model: hand-off to Preservica
 
