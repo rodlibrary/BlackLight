@@ -19,6 +19,11 @@
     <% end %>
   </p>
 
+  <%# Keyboard users can step through every pin, so offer a way past them and the same records as a list. %>
+  <p class="small mb-2">
+    <%= t('preservica.map.keyboard_help') %>
+    <a href="#dc-map-after" class="ms-1"><%= t('preservica.map.skip_map') %></a>
+  </p>
   <div id="dc-map" class="border rounded" style="height: 600px;"
        role="region" aria-label="<%= t('preservica.map.title') %>"
        data-tile-url="<%= ENV.fetch('MAP_TILE_URL', 'https://tile.openstreetmap.org/{z}/{x}/{y}.png') %>"
@@ -29,6 +34,9 @@
 
   <%# Pins as JSON. The map is a visual aid: every record here is also in the list view. %>
   <script type="application/json" id="dc-map-points"><%= raw json_escape(@points.to_json) %></script>
+  <p id="dc-map-after" tabindex="-1" class="mt-2">
+    <%= link_to t('preservica.map.show_list'), search_catalog_path(search_state.params_for_search.except(:bbox, :controller, :action)) %>
+  </p>
 </div>
 
 <script type="module">
@@ -54,9 +62,23 @@
     return box;
   }
 
-  const markers = points.map((p) => L.circleMarker([p.lat, p.lon], {
-    radius: 8, color: '#2E1A47', weight: 2, fillColor: '#FFB500', fillOpacity: 0.9
-  }).bindPopup(() => popup(p)));
+  // Pins are Leaflet markers rather than SVG circles so they can be reached with Tab and opened
+  // with Enter; each is named after its record. Opening one moves focus into the popup, and
+  // closing it returns focus to the pin.
+  const pinIcon = L.divIcon({ className: 'dc-pin', iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -8] });
+  const markers = points.map((p) => {
+    const label = [p.title || 'Untitled', p.date].filter(Boolean).join(', ');
+    const m = L.marker([p.lat, p.lon], { icon: pinIcon, keyboard: true, title: label, alt: label })
+      .bindPopup(() => popup(p));
+    m.on('add', () => m.getElement()?.setAttribute('aria-label', label));
+    m.on('popupopen', (e) => {
+      const box = e.popup.getElement();
+      box?.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') m.closePopup(); });
+      box?.querySelector('a[href]:not(.leaflet-popup-close-button)')?.focus();
+    });
+    m.on('popupclose', () => m.getElement()?.focus());
+    return m;
+  });
   const group = L.featureGroup(markers).addTo(map);
 
   if (el.dataset.bbox) {

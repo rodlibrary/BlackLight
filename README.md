@@ -60,6 +60,7 @@ blacklight/                 files copied into the generated Rails app
 bin/setup_blacklight_app    generates the app and copies the overlay
 samples/demo-docs.json      seven invented records for trying the interface
 docs/solr-fields.md         field profile
+docs/accessibility.md       WCAG 2.1 AA checks, fixes and what still needs testing
 tests/                      pytest suite (no network or Solr needed)
 iiif/                       serverless IIIF pipeline on AWS (see iiif/README.md)
 ```

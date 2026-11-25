@@ -1,4 +1,10 @@
 <%# Leaflet's stylesheet for the Map page and record maps. Leaflet itself is imported as a module in each map's script. %>
 <% content_for(:head) do %>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
+  <style>
+    /* Map pins: gold with a dark ring (over 3:1 against map tiles), and a clear focus ring. */
+    .dc-pin { border-radius: 50%; background: #FFB500; border: 2px solid #2E1A47; box-sizing: border-box; }
+    .dc-pin:focus-visible { outline: 3px solid #2E1A47; outline-offset: 3px; }
+    .leaflet-container a.leaflet-popup-close-button { width: 32px; height: 32px; font-size: 22px; }
+  </style>
 <% end %>

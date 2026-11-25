@@ -8,8 +8,7 @@
         <div style="flex: 1 1 280px;">
           <h2 class="h4"><%= handoff_text('heading') %></h2>
           <p><%= handoff_text('text') %></p>
-          <%= link_to safe_join([handoff_text('button'), ' ', tag.span(t('preservica.handoff.new_tab'), class: 'visually-hidden')]),
-                      landing_url, class: 'btn btn-primary btn-lg', target: '_blank', rel: 'noopener noreferrer' %>
+          <%= helpers.new_tab_link_to handoff_text('button'), landing_url, class: 'btn btn-primary btn-lg' %>
           <p class="small text-body-secondary mt-2 mb-0"><%= t('preservica.handoff.note') %></p>
         </div>
       </div>
@@ -20,14 +19,13 @@
     </div>
     <p class="small">
       <% if landing_url.present? %>
-        <%= link_to safe_join([t('preservica.handoff.viewer_link'), ' ', tag.span(t('preservica.handoff.new_tab'), class: 'visually-hidden')]),
-                    landing_url, target: '_blank', rel: 'noopener noreferrer' %> ·
+        <%= helpers.new_tab_link_to t('preservica.handoff.viewer_link'), landing_url %> ·
       <% end %>
-      <%= link_to 'IIIF manifest', iiif_manifest, target: '_blank', rel: 'noopener noreferrer' %>
+      <%= helpers.new_tab_link_to 'IIIF manifest', iiif_manifest %>
     </p>
   <% elsif iiif_manifest.present? %>
     <p>
-      <%= link_to 'IIIF manifest', iiif_manifest, class: 'btn btn-outline-primary', target: '_blank', rel: 'noopener noreferrer' %>
+      <%= helpers.new_tab_link_to 'IIIF manifest', iiif_manifest, class: 'btn btn-outline-primary' %>
     </p>
   <% elsif media_type == 'image' %>
     <%= image_tag media_url, alt: title, class: 'img-fluid rounded', style: 'max-height: 600px;', loading: 'lazy' %>
@@ -56,11 +54,11 @@
       <%= link_to 'Download the audio', media_url %>
     </audio>
     <% if captions_url %>
-      <p class="small mt-2"><%= link_to 'Transcript (WebVTT)', captions_url, target: '_blank', rel: 'noopener noreferrer' %></p>
+      <p class="small mt-2"><%= helpers.new_tab_link_to 'Transcript (WebVTT)', captions_url %></p>
     <% end %>
   <% elsif media_type == 'pdf' && media_url.present? %>
     <object data="<%= media_url %>" type="application/pdf" class="w-100" style="height: 600px;" aria-label="<%= title %>">
-      <p>This browser can't show the PDF here. <%= link_to 'Open the PDF', media_url, target: '_blank', rel: 'noopener noreferrer' %>.</p>
+      <p>This browser can't show the PDF here. <%= helpers.new_tab_link_to 'Open the PDF', media_url %>.</p>
     </object>
   <% elsif thumbnail_url.present? %>
     <%= image_tag thumbnail_url, alt: '', class: 'img-fluid rounded border', style: 'max-height: 400px;', loading: 'lazy' %>
@@ -68,7 +66,7 @@
 
   <% if media_url.present? %>
     <p class="mt-2">
-      <%= link_to 'Download / view file', media_url, class: 'btn btn-sm btn-primary', target: '_blank', rel: 'noopener noreferrer' %>
+      <%= helpers.new_tab_link_to 'Download / view file', media_url, class: 'btn btn-sm btn-primary' %>
     </p>
   <% end %>
 </section>

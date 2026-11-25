@@ -1,0 +1,29 @@
+// Digital Collections additions to Bootstrap and Blacklight (imported by bin/setup_blacklight_app).
+// Accessibility: WCAG 2.1 AA. See docs/accessibility.md.
+
+// A focus ring that shows on every background (2.4.7 Focus Visible).
+:focus-visible {
+  outline: 3px solid #500778;
+  outline-offset: 2px;
+}
+
+// The footer is dark purple: use gold there.
+.site-footer :focus-visible {
+  outline-color: #FFB500;
+}
+
+// Long identifiers and URLs wrap instead of forcing sideways scrolling at 320px (1.4.10 Reflow).
+.document-metadata dd,
+.blacklight-catalog-show dd,
+.preservica-breadcrumbs {
+  overflow-wrap: anywhere;
+}
+
+// Respect reduced-motion settings.
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
