@@ -33,7 +33,8 @@
     "has_thumbnail_bsi": false,
     "metadata_format_ssi": "entity",
     "ingest_run_ssi": "demo",
-    "has_coordinates_bsi": false
+    "has_coordinates_bsi": false,
+    "dc_xml_ss": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<oai_dc:dc xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\"><dc:title>University Archives</dc:title><dc:description>Records of the university.</dc:description></oai_dc:dc>\n"
   },
   {
     "id": "preservica-f0000000-0000-4000-8000-000000000004",
@@ -118,7 +119,8 @@
     "has_thumbnail_bsi": false,
     "metadata_format_ssi": "oai_dc",
     "ingest_run_ssi": "demo",
-    "has_coordinates_bsi": false
+    "has_coordinates_bsi": false,
+    "dc_xml_ss": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<oai_dc:dc xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\"><dc:title>Annual report</dc:title><dc:date>1960-1962</dc:date><dc:language>eng</dc:language></oai_dc:dc>\n"
   },
   {
     "id": "preservica-f0000000-0000-4000-8000-000000000002",
@@ -243,7 +245,8 @@
     "coordinates_ssm": [
       "42.5355,-92.4453"
     ],
-    "has_coordinates_bsi": true
+    "has_coordinates_bsi": true,
+    "dc_xml_ss": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<oai_dc:dc xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\"><dc:title>Sandbagging on Main Street</dc:title><dc:creator>Daily Herald</dc:creator><dc:subject>Floods</dc:subject><dc:subject>Volunteers</dc:subject><dc:description>A crowd fills sandbags.</dc:description><dc:date>1952-04-14</dc:date></oai_dc:dc>\n"
   },
   {
     "id": "preservica-f0000000-0000-4000-8000-000000000003",
@@ -375,6 +378,7 @@
       "42.4928,-92.3426"
     ],
     "has_coordinates_bsi": true,
-    "mods_xml_ss": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mods:mods xmlns:mods=\"http://www.loc.gov/mods/v3\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n  <mods:titleInfo><mods:title>Oral history interview with Grace Okafor</mods:title></mods:titleInfo>\n  <mods:titleInfo type=\"alternative\"><mods:title>Okafor interview</mods:title></mods:titleInfo>\n  <mods:name type=\"personal\"><mods:namePart>Okafor, Grace</mods:namePart></mods:name>\n  <mods:typeOfResource>sound recording-nonmusical</mods:typeOfResource>\n  <mods:genre>oral histories</mods:genre>\n  <mods:originInfo><mods:dateCreated>1987-05-03</mods:dateCreated></mods:originInfo>\n  <mods:abstract>Recollections of the 1952 flood.</mods:abstract>\n  <mods:subject><mods:topic>Floods</mods:topic></mods:subject>\n  <mods:subject><mods:geographic>Riverton (Ohio)</mods:geographic></mods:subject>\n  <mods:accessCondition type=\"use and reproduction\" xlink:href=\"http://rightsstatements.org/vocab/InC-EDU/1.0/\">In copyright, educational use.</mods:accessCondition>\n  <mods:identifier type=\"local\">uni-ms123-0003</mods:identifier>\n  <mods:identifier type=\"aspace\">aspace_8f2c1e0a91d2</mods:identifier>\n  <mods:relatedItem type=\"host\"><mods:titleInfo><mods:title>MS 123 Flood Relief</mods:title></mods:titleInfo>\n    <mods:identifier>MS-123</mods:identifier></mods:relatedItem>\n</mods:mods>\n"
+    "mods_xml_ss": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mods:mods xmlns:mods=\"http://www.loc.gov/mods/v3\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n  <mods:titleInfo><mods:title>Oral history interview with Grace Okafor</mods:title></mods:titleInfo>\n  <mods:titleInfo type=\"alternative\"><mods:title>Okafor interview</mods:title></mods:titleInfo>\n  <mods:name type=\"personal\"><mods:namePart>Okafor, Grace</mods:namePart></mods:name>\n  <mods:typeOfResource>sound recording-nonmusical</mods:typeOfResource>\n  <mods:genre>oral histories</mods:genre>\n  <mods:originInfo><mods:dateCreated>1987-05-03</mods:dateCreated></mods:originInfo>\n  <mods:abstract>Recollections of the 1952 flood.</mods:abstract>\n  <mods:subject><mods:topic>Floods</mods:topic></mods:subject>\n  <mods:subject><mods:geographic>Riverton (Ohio)</mods:geographic></mods:subject>\n  <mods:accessCondition type=\"use and reproduction\" xlink:href=\"http://rightsstatements.org/vocab/InC-EDU/1.0/\">In copyright, educational use.</mods:accessCondition>\n  <mods:identifier type=\"local\">uni-ms123-0003</mods:identifier>\n  <mods:identifier type=\"aspace\">aspace_8f2c1e0a91d2</mods:identifier>\n  <mods:relatedItem type=\"host\"><mods:titleInfo><mods:title>MS 123 Flood Relief</mods:title></mods:titleInfo>\n    <mods:identifier>MS-123</mods:identifier></mods:relatedItem>\n</mods:mods>\n",
+    "dc_xml_ss": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<oai_dc:dc xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\"><dc:title>Oral history interview with Grace Okafor</dc:title><dc:creator>Okafor, Grace</dc:creator><dc:subject>Floods</dc:subject><dc:description>Recollections of the 1952 flood.</dc:description><dc:date>1987-05-03</dc:date></oai_dc:dc>\n"
   }
 ]

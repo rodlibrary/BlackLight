@@ -2,7 +2,7 @@
 
 # Record page (config.show.document_component): Blacklight's document component
 # with breadcrumbs above the title, for folders the collection's contents, and
-# a MODS download for records that have MODS.
+# metadata downloads (MODS, Dublin Core) for records that have them.
 class PreservicaDocumentComponent < Blacklight::DocumentComponent
   def before_render
     unless header

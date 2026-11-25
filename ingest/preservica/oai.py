@@ -60,6 +60,16 @@ def list_records(client: PreservicaClient, prefix: str, since: str | None = None
         params = {"verb": "ListRecords", "resumptionToken": token}
 
 
+def get_record(client: PreservicaClient, identifier: str, prefix: str) -> ET.Element | None:
+    """One <record> in one metadata format; None if the provider has no such record or format."""
+    root = client.oai({"verb": "GetRecord", "identifier": identifier, "metadataPrefix": prefix})
+    err = root.find("oai:error", NS)
+    if err is not None and err.get("code") in ("idDoesNotExist", "cannotDisseminateFormat"):
+        return None
+    _check(root)
+    return root.find("oai:GetRecord/oai:record", NS)
+
+
 def identify(client: PreservicaClient) -> dict:
     root = client.oai({"verb": "Identify"})
     _check(root)

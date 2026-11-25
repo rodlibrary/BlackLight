@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# "Download metadata (MODS XML)" on a record page, for records the ingest
-# stored MODS for (ModsExport). The file comes from /catalog/<id>.mods.
+# "Download metadata" buttons on a record page (items, folders and collections
+# alike): one per format the ingest stored for the record (MetadataExport).
 class MetadataDownloadComponent < Blacklight::Component
   def initialize(document:)
     super()
@@ -9,15 +9,23 @@ class MetadataDownloadComponent < Blacklight::Component
   end
 
   def render?
-    @document.exports_as?(:mods)
+    formats.any?
   end
 
-  def url
-    helpers.solr_document_path(@document, format: :mods)
+  def formats
+    @formats ||= MetadataExport.available(@document)
   end
 
-  def filename
-    ModsExport.filename(@document)
+  def url(name)
+    helpers.solr_document_path(@document, format: name)
+  end
+
+  def filename(name)
+    MetadataExport.filename(@document, name)
+  end
+
+  def content_type(name)
+    MetadataExport::FORMATS.fetch(name).content_type
   end
 
   def heading_id

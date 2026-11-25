@@ -27,8 +27,8 @@ jobs:
       run: find blacklight -name '*.rb' -print0 | xargs -0 -n1 ruby -wc
     - name: Unit test (About page source list)
       run: ruby test/blacklight/indexed_sources_test.rb
-    - name: Unit test (MODS download)
-      run: ruby test/blacklight/mods_export_test.rb
+    - name: Unit test (metadata downloads)
+      run: ruby test/blacklight/metadata_export_test.rb
     - name: Check ERB templates compile
       run: |
         for f in $(find blacklight -name '*.erb'); do
@@ -74,9 +74,11 @@ jobs:
         # The About page lists source systems from this facet (IndexedSources).
         f=$(curl -fsS 'http://localhost:8983/solr/preservica/select?q=*:*&rows=0&wt=json&facet=true&facet.field=source_ssi&facet.mincount=1' | python3 -c 'import json,sys; print(json.load(sys.stdin)["facet_counts"]["facet_fields"]["source_ssi"])')
         echo "sources: $f"; echo "$f" | grep -q "'preservica', 7"
-        # The MODS download is stored (mods_xml_ss) and comes back whole for the record page.
+        # The metadata downloads are stored (mods_xml_ss, dc_xml_ss) and come back whole for record pages.
         x=$(curl -fsS 'http://localhost:8983/solr/preservica/select?q=id:preservica-a0000000-0000-4000-8000-000000000001&fl=mods_xml_ss&wt=json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["response"]["docs"][0]["mods_xml_ss"])')
         echo "$x" | python3 -c 'import sys, xml.etree.ElementTree as ET; ET.fromstring(sys.stdin.read().strip().encode())'
         echo "$x" | grep -q 'Oral history interview with Grace Okafor'
+        c=$(curl -fsS 'http://localhost:8983/solr/preservica/select?q=id:preservica-f0000000-0000-4000-8000-000000000001&fl=dc_xml_ss&wt=json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["response"]["docs"][0]["dc_xml_ss"])')
+        echo "$c" | python3 -c 'import sys, xml.etree.ElementTree as ET; ET.fromstring(sys.stdin.read().strip().encode())'
         s=$(curl -fsS 'http://localhost:8983/solr/preservica/suggest?q=Okaf&suggest.build=true&wt=json')
         echo "$s"; echo "$s" | grep -qi okafor

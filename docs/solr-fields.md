@@ -21,7 +21,8 @@ Suffixes are the dynamic fields in `solr/conf/schema.xml`:
 | `entity_type_ssim` | facet label: `Item` or `Collection` |
 | `metadata_format_ssi` | `mods`, `oai_dc` or `entity` (folder known only from the Entity API) |
 | `access_status_ssi` | always `public`; `to_solr()` refuses anything else |
-| `mods_xml_ss` | the record's MODS as an XML document, stored but not indexed, served as the "Download metadata (MODS XML)" file (`mods_download`; MODS records only) |
+| `mods_xml_ss` | the record's MODS as an XML document, stored but not indexed, served as the "Download metadata (MODS XML)" file (`mods_download`; records with MODS) |
+| `dc_xml_ss` | the record's Dublin Core (`oai_dc`) as an XML document, stored but not indexed, served as the "Download metadata (Dublin Core XML)" file (`dc_download`) |
 | `ingest_run_ssi`, `indexed_at_dtsi` | run that last wrote the record; used by the stale-record sweep |
 
 ## Hierarchy

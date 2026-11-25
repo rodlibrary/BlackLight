@@ -23,8 +23,8 @@ from ..geo import parse_points
 from .client import PreservicaClient
 from .hierarchy import EntityInfo, Hierarchy
 from .local_metadata import local_fields, validate as validate_local
-from .metadata import check_strip_paths, from_oai_record, media_type_for, mods_document
-from .oai import NS, OAI_ID, list_records
+from .metadata import check_strip_paths, dc_document, from_oai_record, media_type_for, mods_document, mods_fields
+from .oai import NS, OAI_ID, get_record, list_records
 from .thumbnails import ThumbnailCache
 
 log = logging.getLogger(__name__)
@@ -102,9 +102,11 @@ class Harvester:
         self.chain_folders: dict[str, EntityInfo] = {}   # public folders that appear in breadcrumbs
         self.split_on = settings.get("dc_split", ";") or None
         self.local = validate_local(settings.get("local_metadata") or [])
-        # "Download metadata (MODS)" on record pages: the public record's MODS, stored in Solr.
+        # "Download metadata" buttons on record pages: the public record's MODS and Dublin Core, stored in Solr.
         self.mods_download = bool(settings.get("mods_download"))
         self.mods_strip = check_strip_paths(settings.get("mods_download_strip"))
+        self.dc_download = bool(settings.get("dc_download"))
+        self.dc_strip = check_strip_paths(settings.get("dc_download_strip"), "dc_download_strip")
         # IIIF is optional (it needs the AWS pipeline in iiif/). Off: no manifests or map overlays,
         # whatever the templates say, so every item uses the Preservica hand-off.
         self.iiif = bool(settings.get("iiif_enabled"))
@@ -198,8 +200,18 @@ class Harvester:
         local = local_fields(self.client, info, self.local) if self.local and info else {}
         if self.mods_download and f["metadata_format"] == "mods":
             f["mods_xml"] = mods_document(record.find("oai:metadata/mods:mods", NS), self.mods_strip, oai_id)
+        if self.dc_download:
+            f["dc_xml"] = self.dc_download_for(record, f["metadata_format"], oai_id)
         self.handled.add(rid)
         return self.build(kind, ref, title, f, chain, local=local)
+
+    def dc_download_for(self, record: ET.Element, metadata_format: str, oai_id: str) -> str | None:
+        """Dublin Core for the download button. A record harvested as Dublin Core already has it; for a
+        MODS record, Preservica's Dublin Core copy is fetched with GetRecord (one request per record)."""
+        if metadata_format != "oai_dc":
+            record = get_record(self.client, oai_id, "oai_dc")
+        dc = record.find("oai:metadata/oai_dc:dc", NS) if record is not None else None
+        return dc_document(dc, self.dc_strip, oai_id) if dc is not None else None
 
     # ------------------------------------------------------------------ building records
 
@@ -293,6 +305,7 @@ class Harvester:
             file_formats=f["file_formats"],
             metadata_format=f["metadata_format"],
             mods_xml=f.get("mods_xml"),
+            dc_xml=f.get("dc_xml"),
             extra={k: v for k, v in {
                 "alternative_title_tesim": f["alt_titles"],
                 "extent_ssm": f["extent"],
@@ -316,8 +329,38 @@ class Harvester:
             "metadata_format": "entity", "alt_titles": [], "extent": [], "digital_origin": None, "relations": [],
             "coordinates": [],
         }
+        f.update(self.folder_downloads(ref))
         # Not reported as changed by OAI-PMH: keep its cached thumbnail.
         return self.build("so", ref, info.title or "Untitled folder", f, chain, changed=False)
+
+    def folder_downloads(self, ref: str) -> dict:
+        """MODS and Dublin Core for the download buttons of a folder known only from the Entity API
+        (a folder above a harvested item that this run's OAI-PMH results didn't include). Each is fetched
+        with GetRecord and offered only if its OAI record has no non-public security tag. If the folder's
+        MODS restricts access, neither is offered, as an item with that MODS is left out of the index."""
+        out: dict = {}
+        if not (self.mods_download or self.dc_download):
+            return out
+        oai_id = f"oai:so:{ref}"
+        prefix = next((p for p in prefixes(self.s) if p.lower() == "mods"), "MODS")
+        record = get_record(self.client, oai_id, prefix)
+        mods = record.find("oai:metadata/mods:mods", NS) if record is not None else None
+        if mods is not None:
+            if mods_fields(mods)["restricted"]:
+                log.info("%s: MODS restricts access; no metadata downloads for this folder", oai_id)
+                return out
+            if self.mods_download and self._record_is_public(record):
+                out["mods_xml"] = mods_document(mods, self.mods_strip, oai_id)
+        if self.dc_download:
+            record = get_record(self.client, oai_id, "oai_dc")
+            dc = record.find("oai:metadata/oai_dc:dc", NS) if record is not None else None
+            if dc is not None and self._record_is_public(record):
+                out["dc_xml"] = dc_document(dc, self.dc_strip, oai_id)
+        return out
+
+    def _record_is_public(self, record: ET.Element) -> bool:
+        tags = security_tags(record)
+        return not tags or any(t.lower() in self.public for t in tags)
 
 
 def harvest(settings: dict, source: str, since: str | None = None, client: PreservicaClient | None = None,

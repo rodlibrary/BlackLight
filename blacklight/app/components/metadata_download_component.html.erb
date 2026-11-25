@@ -1,8 +1,10 @@
 <section class="metadata-download my-4" aria-labelledby="<%= heading_id %>">
   <h2 id="<%= heading_id %>" class="h5"><%= t('preservica.metadata_download.heading') %></h2>
-  <p class="mb-1">
-    <%= link_to t('preservica.metadata_download.button'), url, download: filename, type: 'application/mods+xml',
-                class: 'btn btn-outline-primary btn-sm' %>
+  <p class="d-flex flex-wrap gap-2 mb-1">
+    <% formats.each do |name| %>
+      <%= link_to t("preservica.metadata_download.button.#{name}"), url(name), download: filename(name),
+                  type: content_type(name), class: 'btn btn-outline-primary btn-sm' %>
+    <% end %>
   </p>
   <p class="small text-body-secondary mb-0"><%= t('preservica.metadata_download.note') %></p>
 </section>

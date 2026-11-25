@@ -32,10 +32,10 @@ sanitized HTML).
   each record page with a location; and, once IIIF is turned on, georeferenced
   scanned maps overlaid on a modern basemap with Allmaps (transparency slider,
   link to the Allmaps Viewer)
-- **Download metadata (MODS XML)** on the page of every record harvested with MODS
-  (`mods_download` in `config.yaml`): the public MODS record as an XML file at
-  `/catalog/<id>.mods`, and a page of search results as one `<modsCollection>` at
-  `/catalog.mods?q=...`. Dublin Core-only records and folders have no MODS to offer
+- **Download metadata** buttons on item and collection pages, in MODS and Dublin Core
+  (`mods_download`, `dc_download` in `config.yaml`): the public record as an XML file at
+  `/catalog/<id>.mods` or `/catalog/<id>.dc`, and a page of search results as one
+  `<modsCollection>` at `/catalog.mods?q=...`. Records without MODS get the Dublin Core button only
 - Advanced search (/advanced), linked beside the search bar: one box per search field, plus checkbox limits. Citations and autocomplete from Blacklight. There are no logins, bookmarks or search history: the site has no user accounts.
 
 ## Repository layout
@@ -151,9 +151,11 @@ All settings are in `config.example.yaml`, with comments. The ones to decide fir
 
 - **`metadata_prefix`**: `[MODS, oai_dc]` indexes MODS where an asset has it and
   Dublin Core otherwise. Use `python -m ingest check` to see what your assets carry.
-- **`mods_download`**: store each public record's MODS for the download link. Elements
-  outside the MODS namespace are always dropped; list any MODS elements to keep out of
-  the file (staff notes, say) in `mods_download_strip`. Takes effect at the next full harvest.
+- **`mods_download`, `dc_download`**: store each public record's MODS and Dublin Core for the
+  download buttons. Dublin Core for a MODS record, and both formats for folders that only
+  appear above harvested items, cost one OAI-PMH `GetRecord` each. Elements outside each
+  format's namespace are always dropped; list any others to keep out of the files (staff
+  notes, say) in `mods_download_strip` and `dc_download_strip`. Takes effect at the next full harvest.
 - **`public_security_tags`**: the tags you publish (default `open`).
 - **`resolve_hierarchy`**: costs one Entity API request per asset, plus one per
   folder, on each run that sees the asset. Turn it off for a quick first look.

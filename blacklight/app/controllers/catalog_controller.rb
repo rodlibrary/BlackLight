@@ -156,13 +156,13 @@ class CatalogController < ApplicationController
 
   private
 
-  # A record's MODS (ModsExport) is sent as a file to save, never shown in the browser as a page.
-  # Registered before Blacklight's own export formats, because the first handler for a format wins.
+  # A record's MODS and Dublin Core (MetadataExport) are sent as files to save, never shown in the
+  # browser as pages. Registered before Blacklight's own export formats: the first handler for a format wins.
   def additional_export_formats(document, format)
-    if document.exports_as?(:mods)
-      format.mods do
-        send_data document.export_as_mods, type: Mime[:mods], disposition: 'attachment',
-                                           filename: ModsExport.filename(document)
+    MetadataExport.available(document).each do |name|
+      format.send(name) do
+        send_data document.export_as(name), type: Mime[name], disposition: 'attachment',
+                                            filename: MetadataExport.filename(document, name)
       end
     end
     super
@@ -170,10 +170,14 @@ class CatalogController < ApplicationController
 
   # A page of search results as MODS (/catalog.mods?q=...): one <modsCollection> of the records on
   # that page that have MODS, instead of Blacklight's default of joining the records with newlines.
+  # Dublin Core has no collection element, so /catalog.dc is not offered.
   def render_document_export_format(format_name)
-    return super unless format_name == :mods
-
-    send_data ModsExport.collection(@response.documents), type: Mime[:mods], disposition: 'attachment',
-                                                          filename: 'search-results-mods.xml'
+    case format_name
+    when :mods
+      send_data MetadataExport.mods_collection(@response.documents), type: Mime[:mods], disposition: 'attachment',
+                                                                     filename: 'search-results-mods.xml'
+    when :dc then raise ActionController::UnknownFormat
+    else super
+    end
   end
 end
