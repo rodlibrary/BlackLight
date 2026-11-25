@@ -198,6 +198,18 @@ All settings are in `config.example.yaml`, with comments. The ones to decide fir
   `MAP_TILE_ATTRIBUTION`) to a tile provider the university uses. Allow these
   hosts if the site sets a Content Security Policy.
 
+## Adding a source system
+
+Each record's `source_ssi` field names the system it came from (`source` in `config.yaml`,
+`preservica` today), and each source's full harvest only removes its own records. The About
+page's Technology section lists a system automatically once its records are in the index:
+`IndexedSources` reads the `source_ssi` facet (cached for an hour) and shows the wording under
+`preservica.about.systems` in `config/locales/preservica.en.yml`. MuseumPlus (`museumplus`),
+UNI ScholarWorks (`scholarworks`), Janeway (`janeway`) and Archive-It (`archiveit`) already have
+wording there. A new source needs a key there with the same name as its `source` value, or it
+is left off the page. Set `DC_SOURCES=preservica,museumplus` to override the list, for example
+on staging.
+
 ## IIIF images and manifests (optional)
 
 IIIF is **off by default**. Until it's turned on, every item keeps the "Open in Preservica"

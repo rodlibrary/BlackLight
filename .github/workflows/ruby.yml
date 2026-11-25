@@ -25,6 +25,8 @@ jobs:
         ruby-version: '3.3'   # Blacklight 9 needs Ruby 3.2 or later
     - name: Check Ruby syntax
       run: find blacklight -name '*.rb' -print0 | xargs -0 -n1 ruby -wc
+    - name: Unit test (About page source list)
+      run: ruby test/blacklight/indexed_sources_test.rb
     - name: Check ERB templates compile
       run: |
         for f in $(find blacklight -name '*.erb'); do
@@ -67,5 +69,8 @@ jobs:
           --data-urlencode 'fq=coordinates_srpt:[42.50,-92.50 TO 42.60,-92.40]' | python3 -c 'import json,sys; print(json.load(sys.stdin)["response"]["numFound"])')
         echo "in the Cedar Falls box: $a"; test "$a" -eq 1
         # Suggestions come back lowercased (KeywordTokenizer + LowerCaseFilter in textSuggest).
+        # The About page lists source systems from this facet (IndexedSources).
+        f=$(curl -fsS 'http://localhost:8983/solr/preservica/select?q=*:*&rows=0&wt=json&facet=true&facet.field=source_ssi&facet.mincount=1' | python3 -c 'import json,sys; print(json.load(sys.stdin)["facet_counts"]["facet_fields"]["source_ssi"])')
+        echo "sources: $f"; echo "$f" | grep -q "'preservica', 7"
         s=$(curl -fsS 'http://localhost:8983/solr/preservica/suggest?q=Okaf&suggest.build=true&wt=json')
         echo "$s"; echo "$s" | grep -qi okafor
