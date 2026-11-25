@@ -14,12 +14,16 @@ The folder tree:
           └── A3 report (Dublin Core)
   A5 deleted; A7 not visible to the service account
 """
+import xml.etree.ElementTree as ET
+
 import pytest
 
 from ingest.core import Deletion, Record
 from ingest.preservica import harvest
 from ingest.preservica.client import HarvestError
 from ingest.preservica.hierarchy import Hierarchy, parse_entity
+from ingest.preservica.metadata import check_strip_paths, mods_document
+from ingest.preservica.oai import NS
 from tests.conftest import FakePreservica, entity_xml, oai_error, oai_page, oai_record
 
 
@@ -318,3 +322,41 @@ def test_iiif_is_off_unless_enabled(tmp_path, caplog):
     assert all(r.iiif_manifest_url is None and r.georeference_url is None for r in records.values())
     assert "couldn't read the IIIF manifest index" not in caplog.text
     assert "iiif_enabled is false" in caplog.text
+
+
+def test_mods_download_off_by_default():
+    records, _, _ = run()
+    assert records[A1].mods_xml is None
+    assert "mods_xml_ss" not in records[A1].to_solr("run")
+
+
+def test_mods_download_stores_public_mods_only():
+    records, deletions, _ = run({"mods_download": True})
+    xml = records[A1].mods_xml
+    assert xml.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"')
+    root = ET.fromstring(xml)                                   # a well-formed, standalone document
+    assert root.findtext("mods:titleInfo/mods:title", namespaces=NS) == "Oral history interview with Grace Okafor"
+    assert 'xlink:href="http://rightsstatements.org/vocab/InC-EDU/1.0/"' in xml
+    assert records[A1].to_solr("run")["mods_xml_ss"] == xml
+    assert records[A2].mods_xml is None and records[F1].mods_xml is None    # Dublin Core / folder: no MODS
+    assert A6 in deletions                                      # restricted MODS never reaches the index
+
+
+def test_mods_download_strip_and_foreign_markup():
+    mods = ET.fromstring(
+        '<mods:mods xmlns:mods="http://www.loc.gov/mods/v3" xmlns:h="http://www.w3.org/1999/xhtml">'
+        '<mods:titleInfo><mods:title>T</mods:title></mods:titleInfo>'
+        '<mods:note type="admin">Donor phone 555-0100</mods:note><mods:note>Public note</mods:note>'
+        '<mods:extension><h:script>alert(1)</h:script></mods:extension></mods:mods>')
+    xml = mods_document(mods, check_strip_paths(["mods:note[@type='admin']"]))
+    assert "Donor" not in xml and "Public note" in xml
+    assert "script" not in xml and "xhtml" not in xml
+    assert len(mods.findall("mods:note", NS)) == 2              # the harvested element is left unchanged
+
+
+def test_mods_download_size_cap_and_bad_paths():
+    big = ET.fromstring('<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"><mods:abstract>'
+                        + "x" * (300 * 1024) + "</mods:abstract></mods:mods>")
+    assert mods_document(big) is None
+    with pytest.raises(ValueError):
+        check_strip_paths(["mods:note[@type="])

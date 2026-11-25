@@ -5,12 +5,23 @@ Record without caring which schema the record carried.
 """
 from __future__ import annotations
 
+import copy
+import logging
 import re
 import xml.etree.ElementTree as ET
 
 from ..core import infer_media_type
 from ..geo import parse_point, parse_points
 from .oai import NS
+
+log = logging.getLogger(__name__)
+
+# Prefixes used when the MODS download is written out (ElementTree's registry is global).
+ET.register_namespace("mods", NS["mods"])
+ET.register_namespace("xlink", NS["xlink"])
+ET.register_namespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")
+# A MODS record larger than this isn't offered for download (Solr stores it in every document).
+MAX_MODS_BYTES = 256 * 1024
 
 # Words in an access condition that mean the item must not be public.
 RESTRICTED = re.compile(r"\b(restricted|closed|embargo(ed)?)\b", re.I)
@@ -144,6 +155,42 @@ def mods_fields(mods: ET.Element) -> dict:
         "coordinates": parse_points(_all(mods, "mods:subject/mods:cartographics/mods:coordinates")),
         "metadata_format": "mods",
     }
+
+
+def check_strip_paths(paths: list[str] | None) -> list[str]:
+    """The mods_download_strip setting, checked: each entry must be a valid ElementTree path."""
+    out = []
+    for p in paths or []:
+        try:
+            ET.Element("check").findall(str(p), NS)
+        except (SyntaxError, KeyError, TypeError) as exc:
+            raise ValueError(f"mods_download_strip: {p!r} is not a valid path ({exc})") from exc
+        out.append(str(p))
+    return out
+
+
+def mods_document(mods: ET.Element, strip: list[str] | None = None, record_ref: str = "") -> str | None:
+    """The record's MODS as a standalone XML document, for the site's "Download metadata" link.
+
+    It is the MODS Preservica's OAI-PMH provider returned for this public record, with two changes:
+      - elements outside the MODS namespace are dropped (e.g. other schemas inside mods:extension),
+        so the file is plain MODS and carries no foreign markup such as XHTML
+      - elements matching `strip` (mods_download_strip, paths relative to <mods:mods>, e.g.
+        "mods:note[@type='admin']") are dropped, for fields the library keeps off the public site
+    Returns None if the result is larger than MAX_MODS_BYTES.
+    """
+    root = copy.deepcopy(mods)
+    remove = {id(e) for path in (strip or []) for e in root.findall(path, NS)}
+    mods_ns = f"{{{NS['mods']}}}"
+    for parent in list(root.iter()):
+        for child in list(parent):
+            if id(child) in remove or not str(child.tag).startswith(mods_ns):
+                parent.remove(child)
+    text = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode") + "\n"
+    if len(text.encode("utf-8")) > MAX_MODS_BYTES:
+        log.warning("%s: MODS is larger than %d KB; no metadata download", record_ref, MAX_MODS_BYTES // 1024)
+        return None
+    return text
 
 
 # --------------------------------------------------------------------------- Dublin Core

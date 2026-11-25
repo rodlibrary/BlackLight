@@ -33,6 +33,17 @@ preservica:
   oai_set: ""                                 # optional OAI set to limit the harvest
   dc_split: ";"                               # split Dublin Core subjects/languages/coverage on this
 
+  # "Download metadata (MODS)" on record pages. The ingest stores each public
+  # record's MODS in Solr, and the site serves it as an XML file at
+  # /catalog/<id>.mods (and a page of search results at /catalog.mods?q=...).
+  # Only records harvested with MODS get it; Dublin Core-only records don't.
+  # Elements outside the MODS namespace are always dropped. List any MODS
+  # elements to keep out of the download as paths relative to <mods:mods>:
+  mods_download: true
+  mods_download_strip: []
+  #  - "mods:note[@type='admin']"
+  #  - "mods:recordInfo"
+
   # Local metadata fragments that OAI-PMH doesn't return, read from the Entity
   # API (needs resolve_hierarchy). Each schema is the fragment's namespace URI;
   # fields maps an element name in it to a Solr field. Department for

@@ -153,4 +153,27 @@ class CatalogController < ApplicationController
     config.autocomplete_enabled = true
     config.autocomplete_path = 'suggest'
   end
+
+  private
+
+  # A record's MODS (ModsExport) is sent as a file to save, never shown in the browser as a page.
+  # Registered before Blacklight's own export formats, because the first handler for a format wins.
+  def additional_export_formats(document, format)
+    if document.exports_as?(:mods)
+      format.mods do
+        send_data document.export_as_mods, type: Mime[:mods], disposition: 'attachment',
+                                           filename: ModsExport.filename(document)
+      end
+    end
+    super
+  end
+
+  # A page of search results as MODS (/catalog.mods?q=...): one <modsCollection> of the records on
+  # that page that have MODS, instead of Blacklight's default of joining the records with newlines.
+  def render_document_export_format(format_name)
+    return super unless format_name == :mods
+
+    send_data ModsExport.collection(@response.documents), type: Mime[:mods], disposition: 'attachment',
+                                                          filename: 'search-results-mods.xml'
+  end
 end

@@ -23,7 +23,7 @@ from ..geo import parse_points
 from .client import PreservicaClient
 from .hierarchy import EntityInfo, Hierarchy
 from .local_metadata import local_fields, validate as validate_local
-from .metadata import from_oai_record, media_type_for
+from .metadata import check_strip_paths, from_oai_record, media_type_for, mods_document
 from .oai import NS, OAI_ID, list_records
 from .thumbnails import ThumbnailCache
 
@@ -102,6 +102,9 @@ class Harvester:
         self.chain_folders: dict[str, EntityInfo] = {}   # public folders that appear in breadcrumbs
         self.split_on = settings.get("dc_split", ";") or None
         self.local = validate_local(settings.get("local_metadata") or [])
+        # "Download metadata (MODS)" on record pages: the public record's MODS, stored in Solr.
+        self.mods_download = bool(settings.get("mods_download"))
+        self.mods_strip = check_strip_paths(settings.get("mods_download_strip"))
         # IIIF is optional (it needs the AWS pipeline in iiif/). Off: no manifests or map overlays,
         # whatever the templates say, so every item uses the Preservica hand-off.
         self.iiif = bool(settings.get("iiif_enabled"))
@@ -193,6 +196,8 @@ class Harvester:
             log.warning("%s has no title; skipped", oai_id)
             return None
         local = local_fields(self.client, info, self.local) if self.local and info else {}
+        if self.mods_download and f["metadata_format"] == "mods":
+            f["mods_xml"] = mods_document(record.find("oai:metadata/mods:mods", NS), self.mods_strip, oai_id)
         self.handled.add(rid)
         return self.build(kind, ref, title, f, chain, local=local)
 
@@ -287,6 +292,7 @@ class Harvester:
             coordinates=coordinates,
             file_formats=f["file_formats"],
             metadata_format=f["metadata_format"],
+            mods_xml=f.get("mods_xml"),
             extra={k: v for k, v in {
                 "alternative_title_tesim": f["alt_titles"],
                 "extent_ssm": f["extent"],

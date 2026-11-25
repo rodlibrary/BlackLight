@@ -119,6 +119,7 @@ class Record:
     coordinates: list[tuple[float, float]] = field(default_factory=list)   # (latitude, longitude) points
     file_formats: list[str] = field(default_factory=list)
     metadata_format: str | None = None  # mods | oai_dc | entity
+    mods_xml: str | None = None         # the public MODS record, for the site's metadata download
     extra: dict = field(default_factory=dict)   # additional Solr fields, already suffixed
 
     def validate(self) -> None:
@@ -217,6 +218,8 @@ class Record:
             "has_coordinates_bsi": bool(self.coordinates),
             "file_format_ssim": _list(self.file_formats),
             "metadata_format_ssi": self.metadata_format,
+            # Stored, not indexed (a _ss string field): served as the record's MODS download.
+            "mods_xml_ss": self.mods_xml,
             "ingest_run_ssi": run_id,
             "indexed_at_dtsi": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
