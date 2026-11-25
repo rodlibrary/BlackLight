@@ -22,6 +22,14 @@ echo "Copying overlay files ..."
 cp -R "$REPO_DIR/blacklight/app/." "$APP_DIR/app/"
 cp -R "$REPO_DIR/blacklight/config/." "$APP_DIR/config/"
 
+# The overlay's stylesheet (focus rings, reflow, reduced motion), imported once after Bootstrap.
+for SHEET in "$APP_DIR/app/assets/stylesheets/application.bootstrap.scss" "$APP_DIR/app/assets/stylesheets/application.scss"; do
+  if [[ -f "$SHEET" ]] && ! grep -q "digital_collections" "$SHEET"; then
+    printf '\n@import "digital_collections";\n' >> "$SHEET"
+    break
+  fi
+done
+
 # Routes for the overlay's static pages (added once; the rest of routes.rb is Blacklight's).
 ROUTES="$APP_DIR/config/routes.rb"
 if ! grep -q "pages#about" "$ROUTES"; then

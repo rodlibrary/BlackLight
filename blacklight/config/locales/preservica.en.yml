@@ -42,6 +42,11 @@ en:
       opacity: 'Overlay transparency'
       allmaps_viewer: 'Open in Allmaps Viewer'
       georef_failed: 'The georeferenced map could not be loaded.'
+      keyboard_help: 'Every record on the map is also in the list view. Use Tab to move between pins and Enter to open one.'
+      skip_map: 'Skip past the map'
+      coordinates:
+        one: 'Coordinates (latitude, longitude):'
+        other: 'Coordinates (latitude, longitude):'
     # Item and collection pages: the hand-off to Preservica's public portal (landing_url_template).
     handoff:
       new_tab: '(opens in a new tab)'

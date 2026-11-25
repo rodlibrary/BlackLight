@@ -5,13 +5,19 @@
        aria-label="<%= georeference_url ? t('preservica.map.georef_heading') : t('preservica.map.item_heading') %>"
        data-points="<%= points.to_json %>" data-georef="<%= georeference_url %>"
        data-tile-url="<%= tile_url %>" data-attribution="<%= tile_attribution %>"></div>
+  <% if points.any? %>
+    <p class="small text-body-secondary mt-2 mb-0">
+      <%= t('preservica.map.coordinates', count: points.size) %>
+      <%= safe_join(points.map { |lat, lon| "#{lat}, #{lon}" }, '; ') %>
+    </p>
+  <% end %>
   <% if georeference_url %>
     <div class="d-flex flex-wrap align-items-center gap-3 mt-2 small">
       <label class="d-flex align-items-center gap-2" for="<%= map_id %>-opacity">
         <%= t('preservica.map.opacity') %>
         <input type="range" id="<%= map_id %>-opacity" min="0" max="100" value="100" style="width: 140px;">
       </label>
-      <%= link_to t('preservica.map.allmaps_viewer'), allmaps_viewer_url, target: '_blank', rel: 'noopener noreferrer' %>
+      <%= helpers.new_tab_link_to t('preservica.map.allmaps_viewer'), allmaps_viewer_url %>
       <span id="<%= map_id %>-note" class="text-body-secondary" hidden><%= t('preservica.map.georef_failed') %></span>
     </div>
   <% end %>
@@ -27,7 +33,7 @@
   L.tileLayer(el.dataset.tileUrl, { attribution: el.dataset.attribution, maxZoom: 19 }).addTo(map);
 
   const pins = points.map(([lat, lon]) => L.circleMarker([lat, lon], {
-    radius: 8, color: '#2E1A47', weight: 2, fillColor: '#FFB500', fillOpacity: 0.9
+    radius: 8, color: '#2E1A47', weight: 2, fillColor: '#FFB500', fillOpacity: 0.9, interactive: false
   }).addTo(map));
   if (pins.length) {
     map.fitBounds(L.featureGroup(pins).getBounds().pad(0.5), { maxZoom: 13 });

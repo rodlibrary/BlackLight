@@ -68,11 +68,17 @@ module ApplicationHelper
     truncate(strip_tags(Array(value).first.to_s), length: 300, separator: ' ')
   end
 
+  # A link that opens in a new tab, and says so to screen reader users.
+  def new_tab_link_to(text, url, **options)
+    link_to(safe_join([text, ' ', tag.span(t('preservica.handoff.new_tab'), class: 'visually-hidden')]),
+            url, **options, target: '_blank', rel: 'noopener noreferrer')
+  end
+
   # Field helper: link a URL field, dropping anything that isn't http(s).
   def render_safe_link(value:, **)
     links = Array(value).filter_map do |v|
       url = safe_url(v)
-      link_to(url, url, target: '_blank', rel: 'noopener noreferrer') if url
+      new_tab_link_to(url, url) if url
     end
     safe_join(links, tag.br)
   end
@@ -82,7 +88,7 @@ module ApplicationHelper
     doi = Array(value).first.to_s.sub(%r{\Ahttps?://(dx\.)?doi\.org/}i, '')
     return '' if doi.blank?
 
-    link_to(doi, "https://doi.org/#{doi}", target: '_blank', rel: 'noopener noreferrer')
+    new_tab_link_to(doi, "https://doi.org/#{doi}")
   end
 
   # Top-level collections for the home page, A-Z.
