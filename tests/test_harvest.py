@@ -293,7 +293,8 @@ def test_universal_access_link_for_rod_library_portal():
 def test_iiif_manifest_index_limits_viewers_to_items_with_manifests(tmp_path):
     index = tmp_path / "index.json"
     index.write_text('{"manifests": ["%s"]}' % A2)
-    settings = {"iiif_manifest_url_template": "https://iiif.example.edu/manifests/{uuid}.json",
+    settings = {"iiif_enabled": True,
+                "iiif_manifest_url_template": "https://iiif.example.edu/manifests/{uuid}.json",
                 "georeference_url_template": "https://annotations.example.edu/?url={manifest}"}
     records, _, _ = run(dict(settings, iiif_manifest_index_url=str(index)))
     assert records[A2].iiif_manifest_url == f"https://iiif.example.edu/manifests/{A2}.json"
@@ -305,3 +306,15 @@ def test_iiif_manifest_index_limits_viewers_to_items_with_manifests(tmp_path):
     assert records[A1].iiif_manifest_url
     records, _, _ = run(dict(settings, iiif_manifest_index_url=str(tmp_path / "missing.json")))
     assert records[A2].iiif_manifest_url is None                   # unreadable index: none, not broken viewers
+
+
+def test_iiif_is_off_unless_enabled(tmp_path, caplog):
+    """With iiif_enabled false (the default) the templates are ignored and the index isn't read."""
+    settings = {"iiif_manifest_url_template": "https://iiif.example.edu/manifests/{uuid}.json",
+                "georeference_url_template": "https://annotations.example.edu/?url={manifest}",
+                "iiif_manifest_index_url": str(tmp_path / "missing.json")}
+    with caplog.at_level("INFO"):
+        records, _, _ = run(settings)
+    assert all(r.iiif_manifest_url is None and r.georeference_url is None for r in records.values())
+    assert "couldn't read the IIIF manifest index" not in caplog.text
+    assert "iiif_enabled is false" in caplog.text

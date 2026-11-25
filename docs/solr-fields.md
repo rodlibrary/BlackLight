@@ -78,8 +78,8 @@ through the Entity API rather than OAI-PMH.
 | `thumbnail_url_ssm` | `thumbnail_url_template`, or the access copy for images |
 | `thumbnail_file_ssi` | thumbnail cached from the Content API (`thumbnails: true`) |
 | `has_thumbnail_bsi` | either of the above |
-| `iiif_manifest_ssi` | `iiif_manifest_url_template` |
-| `georeference_url_ssi` | `georeference_url_template`: IIIF Georeference Annotation for a scanned map (Allmaps) |
+| `iiif_manifest_ssi` | `iiif_manifest_url_template`; only with `iiif_enabled: true` (off by default) |
+| `georeference_url_ssi` | `georeference_url_template`: IIIF Georeference Annotation for a scanned map (Allmaps); only with `iiif_enabled: true` |
 | `coordinates_srpt` | map points `lat,lon` (spatial index: "Search this area") from MODS cartographics, DC coverage or DCDS_local |
 | `coordinates_ssm` | the same points, stored for display |
 | `has_coordinates_bsi` | record has at least one point (Location facet, Map page) |

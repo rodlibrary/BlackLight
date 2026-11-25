@@ -102,7 +102,14 @@ class Harvester:
         self.chain_folders: dict[str, EntityInfo] = {}   # public folders that appear in breadcrumbs
         self.split_on = settings.get("dc_split", ";") or None
         self.local = validate_local(settings.get("local_metadata") or [])
-        self.iiif_refs = load_manifest_index(settings.get("iiif_manifest_index_url"))
+        # IIIF is optional (it needs the AWS pipeline in iiif/). Off: no manifests or map overlays,
+        # whatever the templates say, so every item uses the Preservica hand-off.
+        self.iiif = bool(settings.get("iiif_enabled"))
+        if self.iiif and not settings.get("iiif_manifest_url_template"):
+            log.warning("iiif_enabled is true but iiif_manifest_url_template is empty; no manifests this run")
+        if not self.iiif and (settings.get("iiif_manifest_url_template") or settings.get("georeference_url_template")):
+            log.info("IIIF templates are set but iiif_enabled is false; ignoring them")
+        self.iiif_refs = load_manifest_index(settings.get("iiif_manifest_index_url")) if self.iiif else None
         if self.local and not self.hierarchy:
             log.warning("local_metadata needs resolve_hierarchy: true (it reads the Entity API); ignored")
             self.local = []
@@ -235,7 +242,7 @@ class Harvester:
         for point in parse_points(local.pop("coordinates", [])):
             if point not in coordinates:
                 coordinates.append(point)
-        has_manifest = not is_folder and (self.iiif_refs is None or ref in self.iiif_refs)
+        has_manifest = self.iiif and not is_folder and (self.iiif_refs is None or ref in self.iiif_refs)
         manifest = _fill(self.s.get("iiif_manifest_url_template"), **values) if has_manifest else None
         georef = (_fill(self.s.get("georeference_url_template"), uuid=ref, manifest=quote(manifest, safe=""))
                   if manifest else None)

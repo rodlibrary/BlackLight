@@ -35,10 +35,13 @@
       <dd class="mb-0">A small Python program written for Rod Library. Each night it copies the descriptions of public items from Preservica into Solr, along with the folder structure and thumbnail images. Items that are restricted or withdrawn in Preservica are removed from this site.</dd>
       <dt class="mt-3"><%= link_to 'MODS and Dublin Core', 'https://www.loc.gov/standards/mods/' %></dt>
       <dd class="mb-0">Metadata standards for describing items: titles, names, dates, subjects, places and rights. They supply the filters on the search page, such as Name, Genre, Subject and Date.</dd>
-      <dt class="mt-3"><%= link_to 'IIIF and serverless-iiif', 'https://iiif.io/' %></dt>
-      <dd class="mb-0">The International Image Interoperability Framework is a shared standard for delivering images online. We are introducing it, with Samvera’s serverless-iiif running on Amazon Web Services, so images can open in a zoomable viewer here and be used in other IIIF tools.</dd>
-      <dt class="mt-3"><%= link_to 'Leaflet, OpenStreetMap and Allmaps', 'https://leafletjs.com/' %></dt>
-      <dd class="mb-0">Leaflet draws the maps, using OpenStreetMap’s street map. Photographs with locations appear as points on the Map page. Allmaps lays georeferenced historical maps over the modern map.</dd>
+      <%# Shown once the optional IIIF pipeline (iiif/) is running: set IIIF_ENABLED=true. %>
+      <% if ENV['IIIF_ENABLED'] == 'true' %>
+        <dt class="mt-3"><%= link_to 'IIIF, serverless-iiif and Allmaps', 'https://iiif.io/' %></dt>
+        <dd class="mb-0">The International Image Interoperability Framework is a shared standard for delivering images online. Samvera’s serverless-iiif, running on Amazon Web Services, delivers our images this way, so they open in a zoomable viewer here and can be used in other IIIF tools. Allmaps uses it to lay georeferenced historical maps over the modern map.</dd>
+      <% end %>
+      <dt class="mt-3"><%= link_to 'Leaflet and OpenStreetMap', 'https://leafletjs.com/' %></dt>
+      <dd class="mb-0">Leaflet draws the maps, using OpenStreetMap’s street map. Photographs with locations appear as points on the Map page.</dd>
     </dl>
   </section>
 

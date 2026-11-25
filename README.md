@@ -25,12 +25,13 @@ sanitized HTML).
 - Thumbnails in results. Item and collection pages hand visitors off to
   Preservica Universal Access with an "Open in Preservica" button (the
   library's chosen access model), or show an image, audio, video, PDF or IIIF
-  preview instead if access copies or manifests are published elsewhere
+  preview instead if access copies or manifests are published elsewhere (IIIF is
+  optional and off by default; see below)
 - **Map** (/map), linked beside the search results: records with coordinates as
   pins, with "Search this area"; a "Location: On the map" facet; a small map on
-  each record page with a location; and, for georeferenced scanned maps, the map
-  overlaid on a modern basemap with Allmaps (transparency slider, link to the
-  Allmaps Viewer)
+  each record page with a location; and, once IIIF is turned on, georeferenced
+  scanned maps overlaid on a modern basemap with Allmaps (transparency slider,
+  link to the Allmaps Viewer)
 - Advanced search (/advanced), linked beside the search bar: one box per search field, plus checkbox limits. Citations and autocomplete from Blacklight. There are no logins, bookmarks or search history: the site has no user accounts.
 
 ## Repository layout
@@ -156,9 +157,8 @@ All settings are in `config.example.yaml`, with comments. The ones to decide fir
 - **Link templates**: set `landing_url_template` (and `folder_landing_url_template`)
   to your Universal Access URL pattern so item pages hand visitors off to
   Preservica. If you also publish access
-  copies or IIIF manifests, set the `*_url_template` settings so record pages
-  link and preview them. Set `IIIF_VIEWER_URL` (e.g.
-  `https://uv-v4.netlify.app/#?manifest=`) in the Rails environment to embed a viewer.
+  copies, set `media_url_template` so record pages preview them. IIIF manifests
+  are a separate, optional step: see "IIIF images and manifests (optional)" below.
 
 ## How the ingest stays safe
 
@@ -188,16 +188,28 @@ All settings are in `config.example.yaml`, with comments. The ones to decide fir
   `coverage` values that are points, or a DCDS_local element mapped to
   `coordinates` in `local_metadata`. Accepted forms: `42.51, -92.46`,
   `42.51N 92.46W`, `POINT(-92.46 42.51)`, and decimal bounding boxes (centre point).
-- **Georeferenced maps**: set `iiif_manifest_url_template` and
-  `georeference_url_template` (the item's IIIF Georeference Annotation, for
-  example from Allmaps). Record pages then overlay the scanned map.
+- **Georeferenced maps** need IIIF, so they arrive with it: with `iiif_enabled: true`,
+  set `georeference_url_template` (the item's IIIF Georeference Annotation, for
+  example from Allmaps). Record pages then overlay the scanned map. Points on the
+  Map page don't need IIIF.
 - **Outside services** the browser loads: Leaflet and the Allmaps plugin from
   cdn.jsdelivr.net, and map tiles from tile.openstreetmap.org. OpenStreetMap's
   tile servers are for light use; for production set `MAP_TILE_URL` (and
   `MAP_TILE_ATTRIBUTION`) to a tile provider the university uses. Allow these
   hosts if the site sets a Content Security Policy.
 
-## IIIF images and manifests
+## IIIF images and manifests (optional)
+
+IIIF is **off by default**. Until it's turned on, every item keeps the "Open in Preservica"
+hand-off and nothing depends on AWS. Turn it on once the AWS pipeline is running:
+
+1. Deploy [`iiif/`](iiif/README.md).
+2. In `config.yaml`, set `iiif_enabled: true` and fill in the manifest URLs, then run a full
+   harvest.
+3. For the Blacklight app, set `IIIF_ENABLED=true` (this shows IIIF on the About page) and
+   `IIIF_VIEWER_URL` (e.g. `https://uv-v4.netlify.app/#?manifest=`) to embed a viewer.
+
+Turning it off again is the reverse: `iiif_enabled: false` and a full harvest.
 
 Preservica Enterprise doesn't publish IIIF, so [`iiif/`](iiif/README.md) adds it on AWS.
 Preservica webhooks and a nightly check queue public image assets. A converter

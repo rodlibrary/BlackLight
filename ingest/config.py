@@ -25,6 +25,7 @@ DEFAULTS = {
     "folder_landing_url_template": "",
     "media_url_template": "",
     "thumbnail_url_template": "",
+    "iiif_enabled": False,
     "iiif_manifest_url_template": "",
     "iiif_manifest_index_url": "",
     "georeference_url_template": "",

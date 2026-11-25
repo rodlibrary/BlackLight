@@ -1,5 +1,9 @@
 # IIIF pipeline
 
+> **Optional.** Digital Collections runs without this: items use the "Open in Preservica"
+> hand-off until the catalog's `iiif_enabled` is set to `true` (see step 7 below and the main
+> README). Nothing here needs to be deployed until then.
+
 Rod Library's Preservica (Enterprise edition) doesn't publish IIIF, so this folder builds it
 on AWS. Public image assets become IIIF Image API services (through
 [serverless-iiif](https://github.com/samvera/serverless-iiif)) and IIIF Presentation 3
@@ -72,10 +76,12 @@ You need the AWS SAM CLI, Docker, and an AWS account.
    Without webhooks, the nightly check alone keeps things in step, a day behind.
 6. **First fill:** invoke the reconcile function once, or wait for the night. It queues every
    public asset under `RootFolders`.
-7. **Catalog:** set two values in `config.yaml` from the stack outputs, then run the ingest. Run
-   it after the nightly check, so the index is fresh.
+7. **Catalog:** set `iiif_enabled: true` and two values from the stack outputs in
+   `config.yaml`, then run a full ingest. Run it after the nightly check, so the index is fresh.
+   Also set `IIIF_ENABLED=true` and `IIIF_VIEWER_URL` for the Blacklight app.
 
    ```yaml
+   iiif_enabled: true
    iiif_manifest_url_template: "https://iiif.lib.uni.edu/manifests/{uuid}.json"
    iiif_manifest_index_url:   "https://iiif.lib.uni.edu/manifests/index.json"
    ```
