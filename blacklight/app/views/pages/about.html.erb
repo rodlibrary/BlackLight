@@ -23,16 +23,19 @@
   <section aria-labelledby="about-technology" class="bg-body-tertiary border rounded-3 p-4 mt-4"
            style="border-top: 4px solid #500778 !important;">
     <h2 id="about-technology" class="h3"><%= t('preservica.about.technology_heading') %></h2>
-    <p>Digital Collections is built from open standards and open-source software, most of it shared and maintained by libraries and archives around the world.</p>
+    <p><%= t('preservica.about.technology_intro') %></p>
     <dl class="mb-0">
-      <dt class="mt-3"><%= link_to 'Preservica', 'https://preservica.com/' %></dt>
-      <dd class="mb-0">The library’s digital preservation system and the home of every item. It stores the original files, checks them regularly so they stay intact, and keeps them readable as file formats change. Its public portal, Universal Access, is where you view and download items.</dd>
+      <%# Source systems: each listed once its records are in the index (IndexedSources, locale preservica.about.systems). %>
+      <% @systems.each do |system| %>
+        <dt class="mt-3"><%= link_to system[:name], system[:url] %></dt>
+        <dd class="mb-0"><%= system[:text] %></dd>
+      <% end %>
       <dt class="mt-3"><%= link_to 'Blacklight', 'https://projectblacklight.org/' %></dt>
       <dd class="mb-0">Open-source discovery software used by many university libraries. It provides this site’s search box, filters, collection pages, item pages and map. It is built with Ruby on Rails.</dd>
       <dt class="mt-3"><%= link_to 'Apache Solr', 'https://solr.apache.org/' %></dt>
       <dd class="mb-0">An open-source search engine. It holds an index of the descriptions of public items, so searches, filters and sorting are fast. It holds descriptions only, not the files themselves.</dd>
       <dt class="mt-3">Harvester</dt>
-      <dd class="mb-0">A small Python program written for Rod Library. Each night it copies the descriptions of public items from Preservica into Solr, along with the folder structure and thumbnail images. Items that are restricted or withdrawn in Preservica are removed from this site.</dd>
+      <dd class="mb-0"><%= t('preservica.about.harvester_text', systems: @systems.map { |s| s[:name] }.to_sentence) %></dd>
       <dt class="mt-3"><%= link_to 'MODS and Dublin Core', 'https://www.loc.gov/standards/mods/' %></dt>
       <dd class="mb-0">Metadata standards for describing items: titles, names, dates, subjects, places and rights. They supply the filters on the search page, such as Name, Genre, Subject and Date.</dd>
       <%# Shown once the optional IIIF pipeline (iiif/) is running: set IIIF_ENABLED=true. %>

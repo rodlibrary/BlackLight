@@ -20,6 +20,31 @@ en:
       browse_collections: 'Browse the collections: Special Collections & University Archives and the Institutional Repository'
       viewing_heading: 'Viewing and downloading items'
       technology_heading: 'Technology'
+      technology_intro: 'Digital Collections is built from open standards and open-source software, most of it shared and maintained by libraries and archives around the world.'
+      harvester_text: 'A small Python program written for Rod Library. Each night it copies the descriptions of public items from %{systems} into Solr, along with folder structure and thumbnail images where a system has them. Items that are restricted or withdrawn at the source are removed from this site.'
+      # Source systems, in the order the About page lists them. Each appears once its records are
+      # in the index (the source_ssi value is the key). Add a key here when a new source is added.
+      systems:
+        preservica:
+          name: 'Preservica'
+          url: 'https://preservica.com/'
+          text: 'The library’s digital preservation system, home of Special Collections & University Archives and the Institutional Repository. It stores the original files, checks them regularly so they stay intact, and keeps them readable as file formats change. Its public portal, Universal Access, is where you view and download items.'
+        museumplus:
+          name: 'MuseumPlus'
+          url: 'https://www.zetcom.com/en/museumplus-en/'
+          text: 'The UNI Museum’s collection management system, from zetcom. It holds the museum’s catalog of objects, art and botanical specimens; descriptions of the records the museum marks for public view are copied here.'
+        scholarworks:
+          name: 'UNI ScholarWorks'
+          url: 'https://scholarworks.uni.edu/'
+          text: 'Rod Library’s open-access repository for the research, scholarship and creative work of the UNI community, including journals and monographs. Its public records are copied here through OAI-PMH, and each links back to its ScholarWorks page and PDF.'
+        janeway:
+          name: 'Janeway'
+          url: 'https://janeway.systems/'
+          text: 'Open-source publishing software for journals, books and repositories. It publishes UNI’s journals and monographs; their records are copied here through OAI-PMH, and each links back to the article or book on Janeway.'
+        archiveit:
+          name: 'Archive-It'
+          url: 'https://archive-it.org/'
+          text: 'The Internet Archive’s web archiving service, which the library uses to capture websites before they change or disappear. Descriptions of the archived sites are copied here, and each links to its captures in Archive-It.'
       more_heading: 'For more information'
       more_text: 'See the'
       contact_heading: 'Contact us'
