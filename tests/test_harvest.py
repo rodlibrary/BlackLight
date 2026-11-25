@@ -14,12 +14,16 @@ The folder tree:
           └── A3 report (Dublin Core)
   A5 deleted; A7 not visible to the service account
 """
+import xml.etree.ElementTree as ET
+
 import pytest
 
 from ingest.core import Deletion, Record
 from ingest.preservica import harvest
 from ingest.preservica.client import HarvestError
 from ingest.preservica.hierarchy import Hierarchy, parse_entity
+from ingest.preservica.metadata import check_strip_paths, dc_document, mods_document
+from ingest.preservica.oai import NS
 from tests.conftest import FakePreservica, entity_xml, oai_error, oai_page, oai_record
 
 
@@ -318,3 +322,106 @@ def test_iiif_is_off_unless_enabled(tmp_path, caplog):
     assert all(r.iiif_manifest_url is None and r.georeference_url is None for r in records.values())
     assert "couldn't read the IIIF manifest index" not in caplog.text
     assert "iiif_enabled is false" in caplog.text
+
+
+def test_mods_download_off_by_default():
+    records, _, _ = run()
+    assert records[A1].mods_xml is None
+    assert "mods_xml_ss" not in records[A1].to_solr("run")
+
+
+def test_mods_download_stores_public_mods_only():
+    records, deletions, _ = run({"mods_download": True})
+    xml = records[A1].mods_xml
+    assert xml.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"')
+    root = ET.fromstring(xml)                                   # a well-formed, standalone document
+    assert root.findtext("mods:titleInfo/mods:title", namespaces=NS) == "Oral history interview with Grace Okafor"
+    assert 'xlink:href="http://rightsstatements.org/vocab/InC-EDU/1.0/"' in xml
+    assert records[A1].to_solr("run")["mods_xml_ss"] == xml
+    assert records[A2].mods_xml is None and records[F1].mods_xml is None    # Dublin Core / folder: no MODS
+    assert A6 in deletions                                      # restricted MODS never reaches the index
+
+
+def test_mods_download_strip_and_foreign_markup():
+    mods = ET.fromstring(
+        '<mods:mods xmlns:mods="http://www.loc.gov/mods/v3" xmlns:h="http://www.w3.org/1999/xhtml">'
+        '<mods:titleInfo><mods:title>T</mods:title></mods:titleInfo>'
+        '<mods:note type="admin">Donor phone 555-0100</mods:note><mods:note>Public note</mods:note>'
+        '<mods:extension><h:script>alert(1)</h:script></mods:extension></mods:mods>')
+    xml = mods_document(mods, check_strip_paths(["mods:note[@type='admin']"]))
+    assert "Donor" not in xml and "Public note" in xml
+    assert "script" not in xml and "xhtml" not in xml
+    assert len(mods.findall("mods:note", NS)) == 2              # the harvested element is left unchanged
+
+
+def test_mods_download_size_cap_and_bad_paths():
+    big = ET.fromstring('<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"><mods:abstract>'
+                        + "x" * (300 * 1024) + "</mods:abstract></mods:mods>")
+    assert mods_document(big) is None
+    with pytest.raises(ValueError):
+        check_strip_paths(["mods:note[@type="])
+
+
+def test_dc_download_off_by_default():
+    records, _, client = run()
+    assert records[A2].dc_xml is None
+    assert not [c for c in client.oai_calls if c.get("verb") == "GetRecord"]
+
+
+def test_dc_download_for_dublin_core_and_mods_records():
+    records, deletions, client = run({"dc_download": True})
+    a2 = ET.fromstring(records[A2].dc_xml)                      # harvested as Dublin Core: no extra request
+    assert a2.tag == f"{{{NS['oai_dc']}}}dc"
+    assert a2.findtext("dc:title", namespaces=NS) == "Sandbagging on Main Street"
+    assert records[A2].to_solr("run")["dc_xml_ss"] == records[A2].dc_xml
+    # A MODS record: Preservica's Dublin Core copy, fetched with GetRecord.
+    a1 = ET.fromstring(records[A1].dc_xml)
+    assert a1.findtext("dc:title", namespaces=NS) == "Okafor (DC copy)"
+    get_records = [c for c in client.oai_calls if c.get("verb") == "GetRecord"]
+    assert {c["identifier"] for c in get_records if ":io:" in c["identifier"]} == {f"oai:io:{A1}"}
+    assert all(c["metadataPrefix"] == "oai_dc" for c in get_records if ":io:" in c["identifier"])
+    assert A6 in deletions and records[F1].dc_xml is None       # restricted: removed; folder without OAI record: none
+
+
+def test_dc_download_strip_foreign_markup_and_missing_copy():
+    dc = ET.fromstring(
+        '<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" '
+        'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:x="urn:x">'
+        '<dc:title>T</dc:title><dc:description>Staff: check box 4</dc:description><x:private>no</x:private>'
+        '</oai_dc:dc>')
+    xml = dc_document(dc, check_strip_paths(["dc:description"], "dc_download_strip"))
+    assert xml.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<oai_dc:dc ')
+    assert "<dc:title>T</dc:title>" in xml and "Staff" not in xml and "private" not in xml
+    # A MODS record whose Dublin Core copy the provider doesn't have still gets its MODS.
+    client = FakePreservica({"MODS": pages()["MODS"]}, tree())
+    records, _, _ = run({"dc_download": True, "mods_download": True}, client=client)
+    assert records[A1].dc_xml is None and records[A1].mods_xml
+
+
+FOLDER_MODS = ('<mods:mods><mods:titleInfo><mods:title>University Archives</mods:title></mods:titleInfo>'
+               '<mods:abstract>Records of the university.</mods:abstract></mods:mods>')
+
+
+def test_folder_downloads_fetched_with_public_checks():
+    folder_records = {
+        "MODS": [oai_record(f"oai:so:{R}", FOLDER_MODS, tag="open"),
+                 oai_record(f"oai:so:{F2}", MODS_A6.replace("Medical file", "Series 2"))],   # restricts access
+        "oai_dc": [oai_record(f"oai:so:{R}", dc("University Archives")),
+                   oai_record(f"oai:so:{F1}", dc("Flood Relief Records"), tag="closed"),
+                   oai_record(f"oai:so:{F2}", dc("Series 2"))],
+    }
+    client = FakePreservica(pages(), tree(), get_records=folder_records)
+    records, _, _ = run({"mods_download": True, "dc_download": True}, client=client)
+    root = records[R]
+    assert ET.fromstring(root.mods_xml).findtext("mods:titleInfo/mods:title", namespaces=NS) == "University Archives"
+    assert ET.fromstring(root.dc_xml).findtext("dc:title", namespaces=NS) == "University Archives"
+    assert records[F1].dc_xml is None                           # its OAI record carries a closed tag
+    assert records[F2].mods_xml is None and records[F2].dc_xml is None   # MODS restricts: neither offered
+    assert records[F3].mods_xml is None and records[F3].dc_xml is None   # no OAI record at all
+    assert root.metadata_format == "entity" and root.title == "University Archives"
+
+
+def test_folder_downloads_cost_nothing_when_off():
+    client = FakePreservica(pages(), tree(), get_records={"oai_dc": [oai_record(f"oai:so:{R}", dc("U"))]})
+    run(client=client)
+    assert not [c for c in client.oai_calls if c.get("verb") == "GetRecord"]

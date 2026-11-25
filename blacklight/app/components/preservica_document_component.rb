@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Record page (config.show.document_component): Blacklight's document component
-# with breadcrumbs above the title and, for folders, the collection's contents.
+# with breadcrumbs above the title, for folders the collection's contents, and
+# metadata downloads (MODS, Dublin Core) for records that have them.
 class PreservicaDocumentComponent < Blacklight::DocumentComponent
   def before_render
     unless header
@@ -18,6 +19,12 @@ class PreservicaDocumentComponent < Blacklight::DocumentComponent
     if @document['entity_type_ssi'] == 'folder'
       with_metadata_section do
         render CollectionContentsComponent.new(document: @document)
+      end
+    end
+    metadata_download = MetadataDownloadComponent.new(document: @document)
+    if metadata_download.render?
+      with_metadata_section do
+        render metadata_download
       end
     end
     super

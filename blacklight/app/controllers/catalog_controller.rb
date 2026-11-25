@@ -153,4 +153,31 @@ class CatalogController < ApplicationController
     config.autocomplete_enabled = true
     config.autocomplete_path = 'suggest'
   end
+
+  private
+
+  # A record's MODS and Dublin Core (MetadataExport) are sent as files to save, never shown in the
+  # browser as pages. Registered before Blacklight's own export formats: the first handler for a format wins.
+  def additional_export_formats(document, format)
+    MetadataExport.available(document).each do |name|
+      format.send(name) do
+        send_data document.export_as(name), type: Mime[name], disposition: 'attachment',
+                                            filename: MetadataExport.filename(document, name)
+      end
+    end
+    super
+  end
+
+  # A page of search results as MODS (/catalog.mods?q=...): one <modsCollection> of the records on
+  # that page that have MODS, instead of Blacklight's default of joining the records with newlines.
+  # Dublin Core has no collection element, so /catalog.dc is not offered.
+  def render_document_export_format(format_name)
+    case format_name
+    when :mods
+      send_data MetadataExport.mods_collection(@response.documents), type: Mime[:mods], disposition: 'attachment',
+                                                                     filename: 'search-results-mods.xml'
+    when :dc then raise ActionController::UnknownFormat
+    else super
+    end
+  end
 end

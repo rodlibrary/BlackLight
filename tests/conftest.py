@@ -101,8 +101,12 @@ def entity_xml(kind, ref, title, tag="open", parent=None, description=None, vers
 class FakePreservica:
     """Stands in for PreservicaClient. pages: {prefix: [page, ...]}; entities: {(kind, ref): Element}."""
 
-    def __init__(self, pages=None, entities=None, thumbnails=None, fragments=None):
+    def __init__(self, pages=None, entities=None, thumbnails=None, fragments=None, get_records=None):
         self.pages = {k: list(v) for k, v in (pages or {}).items()}
+        self.all_pages = {k: list(v) for k, v in (pages or {}).items()}   # for GetRecord
+        # Records only GetRecord returns, e.g. folders missing from ListRecords: {prefix: [oai_record(...)]}
+        for prefix, records in (get_records or {}).items():
+            self.all_pages.setdefault(prefix, []).append(oai_page(records))
         self.entities = entities or {}
         self.thumbnails = thumbnails or {}
         self.fragments = fragments or {}
@@ -110,12 +114,24 @@ class FakePreservica:
 
     def oai(self, params):
         self.oai_calls.append(dict(params))
+        if params.get("verb") == "GetRecord":
+            return self.get_record(params["identifier"], params["metadataPrefix"])
         prefix = params.get("metadataPrefix") or self._last_prefix
         self._last_prefix = prefix
         queue = self.pages.get(prefix)
         if not queue:
             return oai_error("noRecordsMatch")
         return queue.pop(0)
+
+    def get_record(self, identifier, prefix):
+        """GetRecord answered from the ListRecords pages set up for that prefix."""
+        for page in self.all_pages.get(prefix, []):
+            for rec in page.iter("{http://www.openarchives.org/OAI/2.0/}record"):
+                if rec.findtext("{http://www.openarchives.org/OAI/2.0/}header/"
+                                "{http://www.openarchives.org/OAI/2.0/}identifier") == identifier:
+                    return ET.fromstring(f"{OAI_HEAD}<GetRecord>{ET.tostring(rec, encoding='unicode')}"
+                                         f"</GetRecord>{OAI_TAIL}")
+        return oai_error("idDoesNotExist")
 
     def entity(self, kind, ref):
         self.entity_calls.append((kind, ref))

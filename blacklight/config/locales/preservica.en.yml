@@ -49,7 +49,7 @@ en:
       more_text: 'See the'
       contact_heading: 'Contact us'
       contact_text: 'Questions about the collections or an item? Email us at'
-      viewing_text: 'Use Digital Collections to search and browse. To view or download an item, choose Open in Preservica on its page. The item opens in a new tab in Preservica, the library’s digital preservation system.'
+      viewing_text: 'Use Digital Collections to search and browse. To view or download an item, choose Open in Preservica on its page. The item opens in a new tab in Preservica, the library’s digital preservation system. Items and collections also have Download metadata buttons, which save the description as an XML file in MODS or Dublin Core.'
     map:
       title: 'Map'
       link: 'Map'
@@ -85,3 +85,10 @@ en:
         heading: 'View this collection in Preservica'
         text: 'Browse the files in this collection in Preservica, the library’s digital preservation system.'
         button: 'Open in Preservica'
+    # Record pages (items and collections): MetadataDownloadComponent, one button per stored format.
+    metadata_download:
+      heading: 'Metadata'
+      button:
+        mods: 'Download metadata (MODS XML)'
+        dc: 'Download metadata (Dublin Core XML)'
+      note: 'This description as an XML file, in MODS or Dublin Core, two library metadata standards.'
